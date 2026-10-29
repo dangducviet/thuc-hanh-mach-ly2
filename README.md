@@ -2,8 +2,7 @@
 
 Công cụ mô phỏng trên trình duyệt để luyện **đấu dây các bài thí nghiệm Vật lý đại cương II** trước khi vào phòng thí nghiệm. Bạn cắm dây giữa các lỗ giắc trên mặt máy, bấm kiểm tra, và công cụ chỉ ra chỗ nào đúng, chỗ nào sai.
 
-👉 **Dùng ngay:** `https://<tên-tài-khoản>.github.io/mac-mach-vat-ly/`
-*(thay bằng link thật sau khi bật GitHub Pages)*
+👉 **Dùng ngay:** https://dangducviet.github.io/thuc-hanh-mach-ly2/
 
 Không cần cài đặt hay tải về. Cũng có thể tải `index.html` về rồi mở bằng trình duyệt, vẫn chạy bình thường.
 
