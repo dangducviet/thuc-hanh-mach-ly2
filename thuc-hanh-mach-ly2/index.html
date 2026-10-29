@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thực Hành Mắc Mạch Vật Lý Đại Cương II - Full 6 Bài Chuẩn Thực Tế (v6)</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-panel: #1e293b;
+      --bg-card: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid #334155;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      z-index: 10;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    select, button {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid #475569;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    select:hover, button:hover {
+      border-color: var(--accent);
+      background-color: #3b4d66;
+    }
+
+    button.btn-primary {
+      background-color: #0284c7;
+      border-color: #38bdf8;
+      font-weight: 600;
+    }
+    button.btn-primary:hover { background-color: #0369a1; }
+
+    button.btn-hint {
+      background-color: #b45309;
+      border-color: #f59e0b;
+    }
+    button.btn-hint:hover { background-color: #92400e; }
+
+    button.btn-danger {
+      background-color: #991b1b;
+      border-color: #ef4444;
+    }
+    button.btn-danger:hover { background-color: #7f1d1d; }
+
+    .color-picker {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #0f172a;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+    .color-dot {
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s;
+    }
+    .color-dot.active {
+      border-color: #fff;
+      transform: scale(1.2);
+      box-shadow: 0 0 8px rgba(255,255,255,0.6);
+    }
+
+    .exam-toggle {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #0f172a;
+      padding: 5px 9px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+    .exam-toggle input {
+      cursor: pointer;
+      accent-color: var(--warning);
+    }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .workspace {
+      flex: 1;
+      position: relative;
+      background: linear-gradient(180deg, #d8a47f 0%, #e6b891 50%, #c68b59 100%);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .workspace::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        0deg,
+        rgba(92, 51, 23, 0.06) 0px,
+        rgba(92, 51, 23, 0.06) 2px,
+        transparent 2px,
+        transparent 22px
+      );
+      pointer-events: none;
+    }
+
+    #bench-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 1260px;
+      max-height: 780px;
+    }
+
+    .terminal-group { cursor: pointer; }
+    .terminal-hit { fill: transparent; }
+    .terminal-outer {
+      transition: transform 0.15s, stroke-width 0.15s, filter 0.15s;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .terminal-group:hover .terminal-outer {
+      transform: scale(1.25);
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.95));
+    }
+    .terminal-group.selected .terminal-outer {
+      transform: scale(1.32);
+      stroke: #facc15 !important;
+      stroke-width: 3.5px !important;
+      filter: drop-shadow(0 0 10px #facc15);
+    }
+
+    .wire-path {
+      fill: none;
+      stroke-linecap: round;
+      cursor: pointer;
+      transition: filter 0.15s, stroke-width 0.15s;
+      filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.45));
+    }
+    .wire-path:hover {
+      stroke-width: 8px !important;
+      filter: drop-shadow(0 0 8px #ffffff);
+    }
+
+    .switch-box { cursor: pointer; }
+    .switch-box:hover rect { stroke: #38bdf8; }
+
+    body.exam-mode .aux-hint {
+      opacity: 0 !important;
+      pointer-events: none;
+    }
+
+    .bench-overlay-top {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid #475569;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      color: #e2e8f0;
+      backdrop-filter: blur(4px);
+    }
+
+    .sidebar {
+      width: 355px;
+      background-color: var(--bg-panel);
+      border-left: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 13px;
+      gap: 12px;
+    }
+
+    .panel-box {
+      background-color: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 11px;
+    }
+
+    .panel-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 7px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-desc {
+      font-size: 0.81rem;
+      line-height: 1.46;
+      color: #cbd5e1;
+    }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 0.82rem;
+    }
+
+    .check-item {
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #1e293b;
+      border-left: 4px solid #64748b;
+      line-height: 1.38;
+    }
+    .check-item.ok {
+      border-left-color: var(--success);
+      background: rgba(34, 197, 94, 0.12);
+    }
+    .check-item.err {
+      border-left-color: var(--danger);
+      background: rgba(239, 68, 68, 0.14);
+    }
+    .check-item.warn {
+      border-left-color: var(--warning);
+      background: rgba(245, 158, 11, 0.14);
+    }
+
+    .wire-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 155px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+    }
+    .wire-chip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e293b;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border: 1px solid #334155;
+    }
+    .wire-chip button {
+      padding: 1px 6px;
+      font-size: 0.7rem;
+      background: #7f1d1d;
+      border: none;
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.73rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>⚡ TRÌNH LUYỆN MẮC MẠCH VẬT LÝ ĐẠI CƯƠNG II (FULL 6 BÀI - CHUẨN THỰC TẾ 1:1)</span>
+    </div>
+
+    <div class="controls-group">
+      <select id="exp-select">
+        <option value="b1_1">Bài 1 (Mạch 1): Cầu dây Wheatstone đo điện trở Rx</option>
+        <option value="b1_2">Bài 1 (Mạch 2): Đo suất điện động Ex (Phương pháp xung đối)</option>
+        <option value="b2">Bài 2: Xác định hằng số điện môi ε (Tụ phẳng & Điện trường kế)</option>
+        <option value="b3_1">Bài 3 (Hình 8): Đo Rx, Cx, Lx (Bảng BKC.006E)</option>
+        <option value="b3_2">Bài 3 (Hình 9): Cộng hưởng mạch RLC nối tiếp (BKC.006E)</option>
+        <option value="b3_3">Bài 3 (Hình 10): Cộng hưởng mạch RLC song song (BKC.006E)</option>
+        <option value="b4">Bài 4: Đo cảm ứng từ B trong lòng ống dây Solenoid dài</option>
+        <option value="b5_1">Bài 5 (Mạch 1): Khảo sát đường cong từ trễ (Dùng Dao động ký)</option>
+        <option value="b5_2">Bài 5 (Mạch 2): Khảo sát đường cong từ trễ (Bộ ghép nối máy tính)</option>
+        <option value="b6">Bài 6: Xác định e/m bằng phương pháp Magnetron</option>
+      </select>
+
+      <div class="color-picker" title="Chọn màu dây cắm">
+        <span style="font-size: 0.76rem; color: var(--text-muted);">Màu dây:</span>
+        <div class="color-dot active" data-color="#dc2626" style="background: #dc2626;" title="Dây Đỏ"></div>
+        <div class="color-dot" data-color="#18181b" style="background: #18181b; border-color: #71717a;" title="Dây Đen"></div>
+        <div class="color-dot" data-color="#2563eb" style="background: #2563eb;" title="Dây Xanh dương"></div>
+        <div class="color-dot" data-color="#eab308" style="background: #eab308;" title="Dây Vàng"></div>
+      </div>
+
+      <label class="exam-toggle" title="Ẩn các ký hiệu phụ và khóa nút Gợi ý">
+        <input type="checkbox" id="exam-mode-cb" />
+        <span>Chế độ Thi thử</span>
+      </label>
+
+      <button class="btn-primary" id="btn-check">✔ Kiểm tra mạch</button>
+      <button class="btn-hint" id="btn-hint">💡 Gợi ý 1 dây</button>
+      <button class="btn-danger" id="btn-reset">🗑 Rút hết dây</button>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div class="workspace">
+      <div class="bench-overlay-top">
+        <span>🖱 <b>Thao tác:</b> Click lỗ cắm 1 ➔ Click lỗ cắm 2 để nối dây (hỗ trợ cắm chồng nhiều giắc vào 1 lỗ). <b>Click đúp vào dây</b> để rút ra.</span>
+      </div>
+
+      <svg id="bench-svg" viewBox="0 0 1160 720" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="drop-shadow" x="-5%" y="-5%" width="112%" height="112%">
+            <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.42" />
+          </filter>
+          <linearGradient id="copper-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f59e0b"/>
+            <stop offset="50%" stop-color="#b45309"/>
+            <stop offset="100%" stop-color="#78350f"/>
+          </linearGradient>
+        </defs>
+        <g id="layer-devices"></g>
+        <g id="layer-wires"></g>
+        <path id="temp-wire" d="" fill="none" stroke="#facc15" stroke-width="5" stroke-dasharray="7,5" pointer-events="none" />
+        <g id="layer-terminals"></g>
+      </svg>
+    </div>
+
+    <aside class="sidebar">
+      <div class="panel-box">
+        <div class="panel-title">
+          <span id="exp-title">Bài 1</span>
+          <span class="badge" id="wire-count-badge" style="background:#334155;">0 dây</span>
+        </div>
+        <div class="task-desc" id="exp-desc"></div>
+      </div>
+
+      <div class="panel-box" style="flex: 1;">
+        <div class="panel-title">
+          <span>📋 Chẩn đoán Sơ đồ Mạch</span>
+        </div>
+        <ul class="check-list" id="diagnostic-list">
+          <li class="check-item">Hãy cắm dây vào các lỗ giắc chuối trên thiết bị, sau đó bấm <b>"Kiểm tra mạch"</b>.</li>
+        </ul>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-title">
+          <span>🔌 Các dây đang cắm trên bàn</span>
+        </div>
+        <div class="wire-list" id="wire-list-container">
+          <span style="color: var(--text-muted); font-size:0.78rem;">Chưa có dây nào.</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    let currentExpId = "b1_1";
+    let selectedWireColor = "#dc2626";
+    let activeTerminalId = null;
+    let wires = [];
+    let switches = {};
+    let examMode = false;
+
+    const svg = document.getElementById("bench-svg");
+    const layerDevices = document.getElementById("layer-devices");
+    const layerWires = document.getElementById("layer-wires");
+    const layerTerminals = document.getElementById("layer-terminals");
+    const tempWire = document.getElementById("temp-wire");
+
+    /***********************************************************************
+     * ĐỊNH NGHĨA ĐẦY ĐỦ 10 SƠ ĐỒ MẠCH THUỘC 6 BÀI THÍ NGHIỆM
+     ***********************************************************************/
+    const EXPERIMENTS = {
+      /* ===================================================================
+         BÀI 1 (MẠCH 1): CẦU DÂY WHEATSTONE ĐO ĐIỆN TRỞ Rx
+         =================================================================== */
+      b1_1: {
+        title: "Bài 1 (Mạch 1): Cầu dây Wheatstone đo Rx",
+        desc: `
+          <b>Chuẩn mặt máy Hình 4 (Giáo trình) & Ảnh thật:</b><br>
+          • <b>Hàng dưới cùng của bảng mạch (7 chốt thẳng hàng):</b> Trái sang phải gồm: Chốt <b>X</b> ➔ 2 chốt <b>Rx</b> (Trái - Phải) ➔ Chốt <b>Z</b> (ở giữa) ➔ 2 chốt <b>R0</b> (Trái - Phải, trong đó chốt phải Rx đã nối liền mạch in với chốt trái R0) ➔ Chốt <b>Y</b>.<br>
+          • <b>Cách mắc:</b> Nguồn DC (+) ➔ A (+) ; A (-) ➔ Chốt <b>X</b> (và nối xuống đầu thước X). Nguồn DC (-) ➔ Chốt <b>Y</b> (và nối xuống đầu thước Y).<br>
+          • Nối 2 chốt <b>Rx</b> ra hộp điện trở mẫu Rx; nối 2 chốt <b>R0</b> ra hộp điện trở đen 6 núm xoay (hộp thật có <b>4 giắc ở cạnh phải</b>, giắc dưới cùng là COM — chọn 2 giắc bất kỳ khác nhau).<br>
+          • Nối từ điểm giữa (chốt phải Rx hoặc chốt trái R0) lên 1 chốt Điện kế <b>G</b>; chốt còn lại của <b>G</b> nối xuống chốt <b>Z</b> (và nối ra con chạy Z trên thước).
+        `,
+        switches: {
+          sw_G: { label: "Điện kế G", options: ["THÔ", "TINH"], value: "THÔ", x: 185, y: 215 },
+          sw_A: { label: "Ampe kế A", options: ["100mA", "200mA"], value: "100mA", x: 385, y: 215 }
+        },
+        drawDevices: () => drawBai1RealBench(true),
+        terminals: getBai1RealTerminals(true),
+        validate: (uf) => validateBai1_1(uf),
+        sampleWires: [
+          ["SRC_POS", "A_POS", "#dc2626"],
+          ["A_NEG", "B_X", "#dc2626"],
+          ["B_X", "RULER_X", "#dc2626"],
+          ["SRC_NEG", "B_Y", "#2563eb"],
+          ["B_Y", "RULER_Y", "#2563eb"],
+          ["B_RX_L", "EXT_RX_1", "#dc2626"],
+          ["B_RX_R", "EXT_RX_2", "#dc2626"],
+          ["B_R0_L", "BOX_R0_TOP", "#dc2626"],
+          ["B_R0_R", "BOX_R0_COM", "#2563eb"],
+          ["B_RX_R", "G_L", "#dc2626"],
+          ["G_R", "B_Z", "#2563eb"],
+          ["B_Z", "RULER_Z", "#2563eb"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 1 (MẠCH 2): ĐO SUẤT ĐIỆN ĐỘNG Ex (PHƯƠNG PHÁP XUNG ĐỐI)
+         =================================================================== */
+      b1_2: {
+        title: "Bài 1 (Mạch 2): Đo S.Đ.Đ Ex (Xung đối)",
+        desc: `
+          <b>Chuẩn mặt máy Hình 4 & Bản vẽ tay Bài 1 (Mạch 2):</b><br>
+          • <b>Vòng mạch dòng chính:</b> Nguồn DC (+) ➔ A (+) ; A (-) ➔ Chốt <b>X</b> (nối xuống đầu thước X). Nguồn DC (-) ➔ Chốt <b>Y</b> (nối xuống đầu thước Y, có thể đi qua biến trở R0 để chỉnh dòng).<br>
+          • <b>Nhánh xung đối:</b> Từ đầu <b>X</b> nối lên chốt <b>(+) của Nguồn điện áp chuẩn Ex = (1,800 ± 0,001)V</b>; từ chốt <b>(-) của Ex</b> nối lên 1 chốt của <b>Điện kế G</b>; chốt còn lại của <b>G</b> nối xuống chốt <b>Z</b> (và xuống con chạy Z trên thước).
+        `,
+        switches: {
+          sw_G: { label: "Điện kế G", options: ["THÔ", "TINH"], value: "THÔ", x: 185, y: 215 },
+          sw_A: { label: "Ampe kế A", options: ["100mA", "200mA"], value: "100mA", x: 385, y: 215 }
+        },
+        drawDevices: () => drawBai1RealBench(false),
+        terminals: getBai1RealTerminals(false),
+        validate: (uf) => validateBai1_2(uf),
+        sampleWires: [
+          ["SRC_POS", "A_POS", "#dc2626"],
+          ["A_NEG", "B_X", "#dc2626"],
+          ["B_X", "RULER_X", "#dc2626"],
+          ["SRC_NEG", "B_Y", "#2563eb"],
+          ["B_Y", "RULER_Y", "#2563eb"],
+          ["B_X", "EX_POS", "#dc2626"],
+          ["EX_NEG", "G_L", "#dc2626"],
+          ["G_R", "B_Z", "#2563eb"],
+          ["B_Z", "RULER_Z", "#2563eb"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 2: XÁC ĐỊNH HẰNG SỐ ĐIỆN MÔI ε (TỤ PHẲNG & ĐIỆN TRƯỜNG KẾ)
+         =================================================================== */
+      b2: {
+        title: "Bài 2: Xác định hằng số điện môi ε",
+        desc: `
+          <b>Chuẩn Hình 3 (Giáo trình), Bản vẽ tay Bài 2 & Ảnh chụp bàn thí nghiệm:</b><br>
+          • <b>Nguồn cao áp (bên trái):</b> Gồm 4 đồng hồ kim mặt trước; cụm chốt cấp nguồn ở góc dưới phải gồm chốt <b>Cao áp (+)</b>, chốt <b>Âm/Đất (-)</b> và chốt <b>Mass (Xanh)</b>.<br>
+          • <b>Hộp điện trở bảo vệ (14) màu xám ở giữa:</b> Nối từ chốt Cao áp (+) của nguồn qua 2 chốt của Hộp điện trở bảo vệ (14), rồi nối lên <b>Chốt trên đỉnh bản cực tụ điện (12)</b>.<br>
+          • <b>Dây nối đất & Que nối đất cầm tay (13):</b> Nối từ chốt Âm/Đất của nguồn sang chốt nối đất của bộ tụ điện/điện trường kế và nối với <b>Thanh nối đất cầm tay (13)</b>.<br>
+          • <b>Đồng hồ Vôn kế (bên phải):</b> Nối 2 chốt ngõ ra của Điện trường kế (dưới núm chỉnh Zero 15) sang 2 chốt <b>V</b> và <b>COM</b> của Vôn kế (thang 3 VDC).
+        `,
+        switches: {},
+        drawDevices: () => drawBai2RealBench(),
+        terminals: getBai2RealTerminals(),
+        validate: (uf) => validateBai2(uf),
+        sampleWires: [
+          ["HV_POS", "RES14_L", "#dc2626"],
+          ["RES14_R", "CAP_TOP_12", "#dc2626"],
+          ["HV_GND", "EM_GND_L", "#18181b"],
+          ["EM_GND_L", "WAND_13", "#dc2626"],
+          ["EM_OUT_POS", "DMM2_V", "#dc2626"],
+          ["EM_OUT_NEG", "DMM2_COM", "#18181b"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 3 (HÌNH 8): ĐO Rx, Cx, Lx TRÊN BẢNG BKC.006E
+         =================================================================== */
+      b3_1: {
+        title: "Bài 3 (Hình 8): Đo Rx, Cx, Lx (Bảng BKC.006E)",
+        desc: `
+          <b>Bảng BKC.006E (vẽ lại theo ảnh thật):</b> ổ đỏ GF + ổ đen GF ở góc trái; thanh trên có hộp <b>Rx</b> cắm giữa 2 ổ đỏ; thanh dưới có 3 ổ đen và <b>tụ mẫu C</b> nằm giữa ổ đen 2 và 3; bên phải là khung nét đứt gồm <b>nhánh C</b> và <b>nhánh L</b> (mỗi nhánh 1 ổ đỏ trên, 1 ổ đen dưới). <b>Hộp Rx màu vàng rút ra được</b> (công tắc "Rx" trên bảng) — rút ra sẽ lộ 2 lỗ cắm để cắm Lx/Cx vào đúng vị trí Rx.<br>
+          <b>Chuẩn Hình 8 giáo trình:</b> vòng kín FG ➔ Rx ➔ (đường ray bên phải) ➔ R0 ➔ FG. Dao động ký: Y+ ở đầu FG phía Rx, X+ ở đầu FG phía R0, đất ở điểm giữa Rx và R0.<br>
+          • <b>Máy phát FG-8020H:</b> giắc Đỏ vào <b>ổ đỏ GF</b>, giắc Đen vào <b>ổ đen GF</b> (đầu A và đầu B của Hình 8).<br>
+          • <b>Hộp Rx:</b> để nguyên ở vị trí <b>CẮM</b>; <b>không</b> nối tắt 2 ổ đỏ hai bên Rx.<br>
+          • <b>"Đường ray bên phải" của Hình 8:</b> 1 dây từ <b>ổ đỏ phía trên bên phải</b> (nhánh L hoặc C) xuống <b>ổ đen phía dưới bên phải</b> (nhánh L hoặc C), để dòng đi từ Rx về R0.<br>
+          • <b>Hộp điện trở mẫu R0</b> nằm trên thanh dưới, giữa B và C của Hình 8: 2 giắc đỏ vào <b>ổ đen số 2</b> và <b>ổ đen số 3</b> (hai ổ hai bên tụ mẫu C). Công tắc "Hộp R0" đổi giữa hộp đen 6 núm và hộp cam 4 núm.<br>
+          • <b>Dao động ký (Hình 8):</b> Y+ (đỏ CH2) vào <b>thanh trên, phía trái Rx</b> (ổ GF đỏ hoặc ổ đỏ trái Rx); X+ (đỏ CH1) vào <b>ổ đen số 1</b> (hoặc 2); 2 dây Đen (CH1, CH2) chụm vào <b>ổ đen số 3</b>, tức điểm giữa Rx và R0.<br>
+          <i>Ghi chú: các dây theo Hình 8. Chưa rõ trên bảng thật: tụ mẫu C nằm song song với R0 khi đo Hình 8 (Hình 8 không có tụ này). Cần xem tụ có rút/cô lập được không.</i>
+        `,
+        switches: {
+          sw_BOX3: { label: "Hộp R0", options: ["ĐEN 6 núm", "CAM 4 núm"], value: "ĐEN 6 núm", x: 530, y: 296 },
+          sw_RX: { label: "Rx", options: ["CẮM", "RÚT RA"], value: "CẮM", x: 330, y: 432 }
+        },
+        drawDevices: () => drawBai3RealBench("h8"),
+        terminals: getBai3RealTerminals(),
+        validate: (uf) => validateBai3(uf, "h8"),
+        sampleWires: [
+          ["FG_RED", "GF_TOP", "#dc2626"],
+          ["FG_BLK", "GF_BOT", "#18181b"],
+          ["BOX_R0_L", "BOT_2", "#dc2626"],
+          ["BOX_R0_R", "BOT_3", "#dc2626"],
+          ["LB_TOP", "LB_BOT", "#2563eb"],
+          ["OSC_Y_RED", "GF_TOP", "#dc2626"],
+          ["OSC_X_RED", "BOT_1", "#dc2626"],
+          ["OSC_X_BLK", "BOT_3", "#18181b"],
+          ["OSC_Y_BLK", "BOT_3", "#18181b"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 3 (HÌNH 9): CỘNG HƯỞNG MẠCH RLC NỐI TIẾP (BẢNG BKC.006E)
+         =================================================================== */
+      b3_2: {
+        title: "Bài 3 (Hình 9): Cộng hưởng RLC nối tiếp (BKC.006E)",
+        desc: `
+          <b>Bảng BKC.006E (vẽ lại theo ảnh thật):</b> ổ đỏ GF + ổ đen GF ở góc trái; thanh trên có hộp <b>Rx</b> cắm giữa 2 ổ đỏ; thanh dưới có 3 ổ đen và <b>tụ mẫu C</b> nằm giữa ổ đen 2 và 3; bên phải là khung nét đứt gồm <b>nhánh C</b> và <b>nhánh L</b> (mỗi nhánh 1 ổ đỏ trên, 1 ổ đen dưới). <b>Hộp Rx màu vàng rút ra được</b> (công tắc "Rx" trên bảng) — rút ra sẽ lộ 2 lỗ cắm để cắm Lx/Cx vào đúng vị trí Rx.<br>
+          <b>Chuẩn Hình 9 giáo trình:</b> vòng kín nối tiếp FG ➔ R0 ➔ Lx ➔ Cx ➔ FG. Dao động ký: X+ ở đầu FG phía R0 (điện áp nguồn), Y+ ở điểm sau R0 (điện áp trên Lx + Cx), đất ở đầu FG phía Cx.<br>
+          • <b>Máy phát FG-8020H:</b> giắc Đỏ vào <b>ổ đỏ GF</b>, giắc Đen vào <b>ổ đen GF</b>.<br>
+          • <b>Hộp Rx:</b> phải <b>RÚT RA</b> (công tắc "Rx"), vì vị trí Rx dành cho R0.<br>
+          • <b>Hộp điện trở mẫu R0:</b> 2 giắc đỏ vào <b>2 ổ đỏ hai bên vị trí Rx</b>. Công tắc "Hộp R0" đổi giữa hộp đen 6 núm và hộp cam 4 núm.<br>
+          • <b>Cx = tụ mẫu C</b> giữ nguyên trên thanh dưới (ổ đen 2 ➔ C ➔ ổ đen 3), <b>không</b> nối tắt 2 ổ đen đó.<br>
+          • <b>Dao động ký (Hình 9):</b> X+ (đỏ CH1) vào <b>thanh trên phía trái R0</b> (ổ GF đỏ / ổ đỏ trái); Y+ (đỏ CH2) vào <b>ổ đỏ phải R0</b> (ổ đỏ phải vị trí Rx); 2 dây Đen (CH1, CH2) chụm vào <b>ổ đen số 1</b> (hoặc 2), tức đầu B phía FG.<br>
+          <i>Ghi chú: theo Hình 9. Nhánh C và L đã gắn sẵn trong khung nét đứt; chưa rõ trên bảng thật nhánh C có song song với L ngay cả ở mạch nối tiếp hay không.</i>
+        `,
+        switches: {
+          sw_BOX3: { label: "Hộp R0", options: ["ĐEN 6 núm", "CAM 4 núm"], value: "ĐEN 6 núm", x: 530, y: 296 },
+          sw_RX: { label: "Rx", options: ["CẮM", "RÚT RA"], value: "CẮM", x: 330, y: 432 }
+        },
+        drawDevices: () => drawBai3RealBench("h9"),
+        terminals: getBai3RealTerminals(),
+        validate: (uf) => validateBai3(uf, "h9"),
+        sampleWires: [
+          ["FG_RED", "GF_TOP", "#dc2626"],
+          ["FG_BLK", "GF_BOT", "#18181b"],
+          ["BOX_R0_L", "TOP_A", "#dc2626"],
+          ["BOX_R0_R", "TOP_B", "#dc2626"],
+          ["OSC_X_RED", "GF_TOP", "#dc2626"],
+          ["OSC_Y_RED", "TOP_B", "#dc2626"],
+          ["OSC_X_BLK", "BOT_1", "#18181b"],
+          ["OSC_Y_BLK", "BOT_1", "#18181b"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 3 (HÌNH 10): CỘNG HƯỞNG MẠCH RLC SONG SONG (BẢNG BKC.006E)
+         =================================================================== */
+      b3_3: {
+        title: "Bài 3 (Hình 10): Cộng hưởng RLC song song (BKC.006E)",
+        desc: `
+          <b>Bảng BKC.006E (vẽ lại theo ảnh thật):</b> ổ đỏ GF + ổ đen GF ở góc trái; thanh trên có hộp <b>Rx</b> cắm giữa 2 ổ đỏ; thanh dưới có 3 ổ đen và <b>tụ mẫu C</b> nằm giữa ổ đen 2 và 3; bên phải là khung nét đứt gồm <b>nhánh C</b> và <b>nhánh L</b> (mỗi nhánh 1 ổ đỏ trên, 1 ổ đen dưới). <b>Hộp Rx màu vàng rút ra được</b> (công tắc "Rx" trên bảng) — rút ra sẽ lộ 2 lỗ cắm để cắm Lx/Cx vào đúng vị trí Rx.<br>
+          <b>Chuẩn Hình 10 giáo trình:</b> FG ➔ R0 ➔ (Cx song song Lx) ➔ FG. Dao động ký giống Hình 9: X+ ở đầu FG phía R0, Y+ ở điểm sau R0, đất ở đầu FG phía dưới.<br>
+          • <b>Máy phát FG-8020H:</b> giắc Đỏ vào <b>ổ đỏ GF</b>, giắc Đen vào <b>ổ đen GF</b>.<br>
+          • <b>Hộp Rx:</b> phải <b>RÚT RA</b> (công tắc "Rx"), vị trí Rx dành cho R0.<br>
+          • <b>Hộp điện trở mẫu R0:</b> 2 giắc đỏ vào <b>2 ổ đỏ hai bên vị trí Rx</b>. Công tắc "Hộp R0" đổi giữa hộp đen 6 núm và hộp cam 4 núm.<br>
+          • <b>Thanh dưới:</b> Hình 10 không có tụ nối tiếp ở thanh dưới, nên cần <b>1 dây nối tắt tụ mẫu C</b> (ổ đen số 2 ➔ ổ đen số 3) để nhánh C và nhánh L cùng về FG.<br>
+          • <b>Dao động ký (Hình 10):</b> X+ (đỏ CH1) vào <b>thanh trên phía trái R0</b> (ổ GF đỏ / ổ đỏ trái); Y+ (đỏ CH2) vào <b>ổ đỏ phải R0</b>; 2 dây Đen (CH1, CH2) chụm vào <b>ổ đen số 1</b> (hoặc 2).<br>
+          <i>Ghi chú: dây nối tắt tụ mẫu C là suy ra từ Hình 10 (thanh dưới liền mạch); cần xác nhận với bảng thật.</i>
+        `,
+        switches: {
+          sw_BOX3: { label: "Hộp R0", options: ["ĐEN 6 núm", "CAM 4 núm"], value: "ĐEN 6 núm", x: 530, y: 296 },
+          sw_RX: { label: "Rx", options: ["CẮM", "RÚT RA"], value: "CẮM", x: 330, y: 432 }
+        },
+        drawDevices: () => drawBai3RealBench("h10"),
+        terminals: getBai3RealTerminals(),
+        validate: (uf) => validateBai3(uf, "h10"),
+        sampleWires: [
+          ["FG_RED", "GF_TOP", "#dc2626"],
+          ["FG_BLK", "GF_BOT", "#18181b"],
+          ["BOX_R0_L", "TOP_A", "#dc2626"],
+          ["BOX_R0_R", "TOP_B", "#dc2626"],
+          ["BOT_2", "BOT_3", "#2563eb"],
+          ["OSC_X_RED", "GF_TOP", "#dc2626"],
+          ["OSC_Y_RED", "TOP_B", "#dc2626"],
+          ["OSC_X_BLK", "BOT_1", "#18181b"],
+          ["OSC_Y_BLK", "BOT_1", "#18181b"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 4: ĐO CẢM ỨNG TỪ B TRONG LÒNG ỐNG DÂY SOLENOID DÀI
+         =================================================================== */
+      b4: {
+        title: "Bài 4: Cảm ứng từ B trong lòng ống dây Solenoid",
+        desc: `
+          <b>Chuẩn 100% ảnh chụp bàn thí nghiệm Bài 4 của bạn:</b><br>
+          • <b>Bộ nguồn BKC-P.02 (trái):</b> Có cặp lỗ cắm <code>DC</code> ở trên và cặp lỗ cắm xoay chiều <code>AC ~</code> ở dưới. <b>Bắt buộc lấy nguồn xoay chiều AC ~ (nấc 3V/6V)!</b><br>
+          • <b>Biến trở con chạy RhS20-2 (giữa):</b> Có 2 chốt Đỏ ở 2 đầu cuộn dây và 1 chốt Đỏ trên thanh trượt. Chỉ dùng <b>2 trong 3 chốt</b>: 1 đầu + chốt thanh trượt (chỉnh được dòng) — ảnh thực tế của bạn cắm vào 2 đầu cuộn dây (khi đó là điện trở cố định) cũng được chấp nhận.<br>
+          • <b>Ống dây đồng Solenoid dài (trên):</b> Có 2 chốt Đỏ ở mặt trước chân đế.<br>
+          • <b>Đồng hồ vạn năng đỏ UNI-T (dưới):</b> Cắm vào chốt <b>20A</b> (ngoài cùng bên trái) và chốt <b>COM</b> (ở giữa) để đo dòng xoay chiều.
+        `,
+        switches: {},
+        drawDevices: () => drawBai4RealBench(),
+        terminals: getBai4RealTerminals(),
+        validate: (uf) => validateBai4(uf),
+        sampleWires: [
+          ["P02_AC_1", "RHEO_BOT_L", "#2563eb"],
+          ["RHEO_SLIDER", "SOL4_L", "#dc2626"],
+          ["SOL4_R", "UNIT_20A", "#dc2626"],
+          ["UNIT_COM", "P02_AC_2", "#dc2626"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 5 (MẠCH 1): KHẢO SÁT ĐƯỜNG CONG TỪ TRỄ (DAO ĐỘNG KÝ)
+         =================================================================== */
+      b5_1: {
+        title: "Bài 5 (Mạch 1): Đường cong từ trễ (Dao động ký)",
+        desc: `
+          <b>Bảng BKC.013E – biến áp đã nối sẵn bên trong bảng (mạch in); bạn cắm mẫu R, C và đấu các dây sau:</b><br>
+          • <b>Nguồn xoay chiều (~9 V)</b> ➔ 2 ổ <b>GF</b>. Trên bảng: GF trên ➔ (chốt phụ) ➔ N₁ ➔ ổ phải R₁; GF dưới ➔ ổ trái R₁ (điểm <b>COM</b>).<br>
+          • <b>R₁ = hộp điện trở thập phân màu cam</b>: cắm 2 giắc vào <b>2 ổ R₁ (hàng trên)</b>. Hai ổ <b>U<sub>x</sub></b> (hàng dưới) là 2 ổ riêng, nối sẵn với 2 ổ R₁ để lấy điện áp trên R₁.<br>
+          • <b>Cắm mẫu R = 1 MΩ và mẫu C = 0,68 µF</b> (đặt dọc) vào bảng: bấm công tắc “Mẫu R”, “Mẫu C” sang CẮM. Thứ cấp N₂ ➔ R ➔ C đã nối sẵn bằng mạch in.<br>
+          • <b>U<sub>x</sub></b> (∝ H) ➔ <b>CH1 (X)</b>; <b>U<sub>y</sub></b> (2 ổ đặt dọc song song với C, ∝ B) ➔ <b>CH2 (Y)</b>. Hai dây Đen (COM): một dây về ổ <b>trái</b> của U<sub>x</sub>, một dây về ổ U<sub>y</sub> phía dưới (−).<br>
+          <i>Ghi chú: chốt phụ giữa GF trên và biến áp nối thông với GF trên (không dùng trong bài này).</i>
+        `,
+        switches: {
+          sw_R: { label: "Mẫu R", options: ["CẮM", "RÚT RA"], value: "RÚT RA", x: 875, y: 455 },
+          sw_C: { label: "Mẫu C", options: ["CẮM", "RÚT RA"], value: "RÚT RA", x: 965, y: 455 }
+        },
+        sampleSwitches: { sw_R: "CẮM", sw_C: "CẮM" },
+        drawDevices: () => drawBai5RealBench("scope"),
+        terminals: getBai5RealTerminals("scope"),
+        validate: (uf) => validateBai5(uf, "scope"),
+        sampleWires: [
+          ["P01_AC_1", "B5_GF_TOP", "#dc2626"],
+          ["P01_AC_2", "B5_GF_BOT", "#18181b"],
+          ["ORANGE_R_1", "B5_R1_L", "#dc2626"],
+          ["ORANGE_R_2", "B5_R1_R", "#18181b"],
+          ["B5_UX_R", "B5_OSC_X_RED", "#dc2626"],
+          ["B5_UX_L", "B5_OSC_X_BLK", "#18181b"],
+          ["B5_C_A", "B5_OSC_Y_RED", "#dc2626"],
+          ["B5_C_B", "B5_OSC_Y_BLK", "#18181b"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 5 (MẠCH 2): KHẢO SÁT ĐƯỜNG CONG TỪ TRỄ (GHÉP NỐI MÁY TÍNH CASSY-S)
+         =================================================================== */
+      b5_2: {
+        title: "Bài 5 (Mạch 2): Đường cong từ trễ (Ghép nối PC - CASSY-S)",
+        desc: `
+          <b>Mạch trên bảng BKC.013E giống hệt Mạch 1</b> (nguồn ➔ GF; hộp cam cắm vào 2 ổ R₁ hàng trên; cắm mẫu R và mẫu C). Chỉ khác phần đo:<br>
+          • <b>U<sub>x</sub></b> (2 ổ U<sub>x</sub> hàng dưới) ➔ <b>INPUT A</b> của CASSY-S: dây đỏ vào ổ <b>U</b> (đỏ), dây đen vào ổ đất ⏚ (xanh dương). Ổ đỏ nối vào ổ <b>phải</b> U<sub>x</sub>, dây đất về ổ <b>trái</b> U<sub>x</sub>.<br>
+          • <b>U<sub>y</sub></b> (2 ổ đặt dọc cạnh tụ C) ➔ <b>INPUT B</b>: ổ U đỏ vào ổ U<sub>y</sub> phía trên (+), ổ đất ⏚ vào ổ U<sub>y</sub> phía dưới (−).<br>
+          • Hai ổ đất của INPUT A và B nối chung trong máy nên COM ở U<sub>x</sub> (trái) và U<sub>y</sub> (dưới) thành điểm chung.<br>
+          <i>CASSY-S đã nối USB với máy tính (không cần mắc).</i>
+        `,
+        switches: {
+          sw_R: { label: "Mẫu R", options: ["CẮM", "RÚT RA"], value: "RÚT RA", x: 875, y: 455 },
+          sw_C: { label: "Mẫu C", options: ["CẮM", "RÚT RA"], value: "RÚT RA", x: 965, y: 455 }
+        },
+        sampleSwitches: { sw_R: "CẮM", sw_C: "CẮM" },
+        drawDevices: () => drawBai5RealBench("pc"),
+        terminals: getBai5RealTerminals("pc"),
+        validate: (uf) => validateBai5(uf, "pc"),
+        sampleWires: [
+          ["P01_AC_1", "B5_GF_TOP", "#dc2626"],
+          ["P01_AC_2", "B5_GF_BOT", "#18181b"],
+          ["ORANGE_R_1", "B5_R1_L", "#dc2626"],
+          ["ORANGE_R_2", "B5_R1_R", "#18181b"],
+          ["B5_UX_R", "DAQ_A_POS", "#dc2626"],
+          ["B5_UX_L", "DAQ_A_NEG", "#2563eb"],
+          ["B5_C_A", "DAQ_B_POS", "#dc2626"],
+          ["B5_C_B", "DAQ_B_NEG", "#2563eb"]
+        ]
+      },
+
+      /* ===================================================================
+         BÀI 6: XÁC ĐỊNH e/m BẰNG PHƯƠNG PHÁP MAGNETRON
+         =================================================================== */
+      b6: {
+        title: "Bài 6: Xác định e/m (Phương pháp Magnetron)",
+        desc: `
+          <b>Chuẩn 100% theo 2 ảnh chụp cận cảnh mặt máy Magnetron mới nhất của bạn:</b><br>
+          • <b>Ampe kế A1 (bên trái):</b> Chỉ có <b>2 chốt dọc</b> bên phải đồng hồ: trên là <b>+ (Đỏ)</b>, dưới là <b>- (Đen)</b>.<br>
+          • <b>Cuộn dây Solenoid (ở giữa):</b> Trên vành nhựa tròn phía trên cuộn dây có <b>2 tai hàn (2 chốt cắm)</b> ở 2 bên trái/phải. Nối vòng mạch 1: <b>U1 (+) ➔ A1 (+) ; A1 (-) ➔ Chốt 1 cuộn dây ; Chốt 2 cuộn dây ➔ U1 (-)</b>.<br>
+          • <b>Sợi nung F - F:</b> Hai chốt dưới chân đèn nối trực tiếp vào <b>U2 (-) và U2 (+)</b>.<br>
+          • <b>Mạch Anốt - Lưới - Catốt:</b> Chốt <b>A</b> (phía trên bên phải cuộn dây) nối vào chốt <b>- (trên) của A2</b>. Chốt <b>+ (dưới) của A2</b>, chốt <b>G</b>, chốt <b>+ (trên) của V</b> và <b>U3 (+)</b> nối chung. Chốt <b>K</b>, chốt <b>- (dưới) của V</b> và <b>U3 (-)</b> nối chung.
+        `,
+        switches: {
+          sw_A1: { label: "Thang A1", options: ["3A", "5A"], value: "5A", x: 255, y: 392 },
+          sw_A2: { label: "Thang A2", options: ["1mA", "3mA"], value: "3mA", x: 785, y: 278 },
+          sw_V:  { label: "Thang V", options: ["10V", "12V"], value: "12V", x: 785, y: 445 }
+        },
+        drawDevices: () => drawBai6RealBench(),
+        terminals: getBai6RealTerminals(),
+        validate: (uf) => validateBai6(uf),
+        sampleWires: [
+          ["U1_POS", "A1_POS", "#dc2626"],
+          ["A1_NEG", "SOL_TOP_L", "#dc2626"],
+          ["SOL_TOP_R", "U1_NEG", "#18181b"],
+          ["U2_NEG", "MAG_F1", "#dc2626"],
+          ["U2_POS", "MAG_F2", "#dc2626"],
+          ["U3_POS", "V_POS", "#dc2626"],
+          ["V_POS", "MAG_G", "#dc2626"],
+          ["MAG_G", "A2_POS", "#dc2626"],
+          ["A2_NEG", "MAG_A", "#dc2626"],
+          ["U3_NEG", "V_NEG", "#dc2626"],
+          ["V_NEG", "MAG_K", "#dc2626"]
+        ]
+      }
+    };
+
+    /***********************************************************************
+     * CÁC HÀM VẼ THIẾT BỊ THỰC TẾ 1:1 CHO CẢ 6 BÀI
+     ***********************************************************************/
+
+    /* ==================== BÀI 1 (CHUẨN HÌNH 4 GIÁO TRÌNH) ==================== */
+    function drawBai1RealBench(showRx) {
+      let html = `
+        <g filter="url(#drop-shadow)">
+          <rect x="40" y="25" width="665" height="495" rx="8" fill="#18181b" stroke="#09090b" stroke-width="4"/>
+          <rect x="58" y="43" width="629" height="459" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+
+          <text x="535" y="84" font-size="11.5" font-weight="bold" fill="#1e3a8a" text-anchor="middle">BỘ THÍ NGHIỆM VẬT LÝ</text>
+          <text x="535" y="99" font-size="9.5" font-weight="bold" fill="#334155" text-anchor="middle">ĐO ĐIỆN TRỞ BẰNG MẠCH CẦU WHEATSTONE</text>
+          <text x="535" y="112" font-size="9.5" font-weight="bold" fill="#334155" text-anchor="middle">ĐO SUẤT ĐIỆN ĐỘNG BẰNG PHƯƠNG PHÁP XUNG ĐỐI</text>
+
+          <!-- Đồng hồ Điện kế G -->
+          <rect x="115" y="65" width="140" height="115" rx="6" fill="#18181b" stroke="#3f3f46" stroke-width="3"/>
+          <rect x="127" y="75" width="116" height="62" rx="3" fill="#ffffff"/>
+          <path d="M 140 125 Q 185 85 230 125" fill="none" stroke="#334155" stroke-width="1.5"/>
+          <line x1="185" y1="128" x2="185" y2="88" stroke="#dc2626" stroke-width="2"/>
+          <text x="185" y="122" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">µA (G)</text>
+          <rect x="115" y="190" width="140" height="65" rx="4" fill="none" stroke="#475569" stroke-width="1.5"/>
+          <text x="142" y="245" font-size="10" font-weight="bold" fill="#0f172a" class="aux-hint">Thô</text>
+          <text x="228" y="245" font-size="10" font-weight="bold" fill="#0f172a" class="aux-hint">Tinh</text>
+
+          <!-- Đồng hồ Ampe kế A -->
+          <rect x="315" y="65" width="140" height="115" rx="6" fill="#18181b" stroke="#3f3f46" stroke-width="3"/>
+          <rect x="327" y="75" width="116" height="62" rx="3" fill="#ffffff"/>
+          <path d="M 340 125 Q 385 85 430 125" fill="none" stroke="#334155" stroke-width="1.5"/>
+          <line x1="355" y1="128" x2="372" y2="90" stroke="#dc2626" stroke-width="2"/>
+          <text x="385" y="122" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">mA (A)</text>
+          <rect x="315" y="190" width="140" height="65" rx="4" fill="none" stroke="#475569" stroke-width="1.5"/>
+          <text x="338" y="245" font-size="9.5" font-weight="bold" fill="#0f172a" class="aux-hint">100mA</text>
+          <text x="430" y="245" font-size="9.5" font-weight="bold" fill="#0f172a" class="aux-hint">200mA</text>
+          <text x="335" y="208" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+          <text x="432" y="208" font-size="13" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+
+          <!-- Khung Nguồn điện áp 1 chiều DC 0 - 6V/1A -->
+          <rect x="485" y="145" width="178" height="195" rx="4" fill="none" stroke="#334155" stroke-width="1.8"/>
+          <text x="574" y="165" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle">NGUỒN ĐIỆN ÁP 1 CHIỀU</text>
+          <text x="574" y="180" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">DC 0 ÷ 6/1A</text>
+          <rect x="515" y="198" width="20" height="28" rx="2" fill="#18181b"/>
+          <circle cx="615" cy="212" r="10" fill="#18181b"/><text x="615" y="195" font-size="8.5" fill="#0f172a" text-anchor="middle">FUSE</text>
+          <circle cx="580" cy="260" r="22" fill="#18181b" stroke="#71717a" stroke-width="3"/>
+          <circle cx="580" cy="260" r="13" fill="#e2e8f0"/>
+          <text x="538" y="330" font-size="13" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+          <text x="612" y="330" font-size="14" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+
+          <!-- Khung Nguồn điện áp chuẩn Ex = (1,800 ± 0,001)V -->
+          <rect x="145" y="272" width="255" height="110" rx="4" fill="none" stroke="#334155" stroke-width="1.8"/>
+          <text x="272" y="292" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle">NGUỒN ĐIỆN ÁP CHUẨN</text>
+          <text x="272" y="308" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle">Ex = (1,800 ± 0,001)V</text>
+          <rect x="178" y="330" width="20" height="28" rx="2" fill="#18181b"/>
+          <text x="265" y="375" font-size="13" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+          <text x="342" y="375" font-size="14" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+
+          <!-- Hàng 7 chốt thẳng hàng phía dưới cùng (Giống hệt Hình 4 mới gửi) -->
+          <!-- Đường nối X sang chốt trái Rx -->
+          <line x1="115" y1="455" x2="205" y2="455" stroke="#0f172a" stroke-width="2.2"/>
+          <!-- Ký hiệu Rx giữa 2 chốt Rx -->
+          <rect x="223" y="447" width="34" height="16" fill="#fff" stroke="#0f172a" stroke-width="1.8"/>
+          <text x="240" y="459" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">Rx</text>
+          <!-- Đường vòng từ chốt phải Rx vòng qua trên chốt Z sang chốt trái R0 -->
+          <polyline points="275,455 275,422 455,422 455,455" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+          <!-- Ký hiệu R0 giữa 2 chốt R0 -->
+          <rect x="473" y="447" width="34" height="16" fill="#fff" stroke="#0f172a" stroke-width="1.8"/>
+          <text x="490" y="459" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">R0</text>
+          <!-- Đường nối từ chốt phải R0 sang chốt Y -->
+          <line x1="525" y1="455" x2="625" y2="455" stroke="#0f172a" stroke-width="2.2"/>
+
+          <text x="115" y="482" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">X</text>
+          <text x="365" y="482" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">Z</text>
+          <text x="625" y="482" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">Y</text>
+        </g>
+
+        <!-- Thước dây cầu 1m bên dưới -->
+        <g filter="url(#drop-shadow)">
+          <rect x="40" y="575" width="665" height="78" rx="6" fill="#334155" stroke="#1e293b" stroke-width="3"/>
+          <rect x="80" y="592" width="585" height="24" fill="#f1f5f9" stroke="#94a3b8"/>
+          <line x1="70" y1="632" x2="675" y2="632" stroke="#d97706" stroke-width="3.5"/>
+          <rect x="342" y="582" width="52" height="64" rx="4" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+          <text x="368" y="604" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">Z</text>
+          <text x="62" y="595" font-size="12" font-weight="bold" fill="#f8fafc">X</text>
+          <text x="685" y="595" font-size="12" font-weight="bold" fill="#f8fafc">Y</text>
+        </g>
+
+        <!-- Hộp điện trở R0 đen 6 núm xoay -->
+        <g filter="url(#drop-shadow)">
+          <rect x="755" y="280" width="350" height="370" rx="14" fill="#18181b" stroke="#3f3f46" stroke-width="3.5"/>
+          <text x="930" y="310" font-size="12" font-weight="bold" fill="#a1a1aa" text-anchor="middle">HỘP ĐIỆN TRỞ MẪU R0 (6 NÚM XOAY)</text>
+          <text x="1078" y="627" font-size="9.5" font-weight="bold" fill="#a1a1aa" text-anchor="middle" class="aux-hint">COM</text>
+          ${[
+            {x: 875, y: 375, lbl: "x1000"}, {x: 995, y: 375, lbl: "x100"},
+            {x: 875, y: 485, lbl: "x10"},   {x: 995, y: 485, lbl: "x1"},
+            {x: 875, y: 595, lbl: "x10k"},  {x: 995, y: 595, lbl: "x0.1"}
+          ].map(d => `
+            <circle cx="${d.x}" cy="${d.y}" r="35" fill="#27272a" stroke="#52525b" stroke-width="2"/>
+            <circle cx="${d.x}" cy="${d.y}" r="18" fill="#09090b" stroke="#3f3f46"/>
+            <line x1="${d.x}" y1="${d.y}" x2="${d.x}" y2="${d.y-17}" stroke="#f8fafc" stroke-width="2"/>
+            <text x="${d.x}" y="${d.y+47}" font-size="10" font-weight="bold" fill="#a1a1aa" text-anchor="middle">${d.lbl}</text>
+          `).join("")}
+        </g>
+      `;
+
+      if (showRx) {
+        html += `
+          <g filter="url(#drop-shadow)">
+            <rect x="780" y="65" width="295" height="165" rx="10" fill="#1e293b" stroke="#475569" stroke-width="3"/>
+            <text x="927" y="92" font-size="12" font-weight="bold" fill="#f8fafc" text-anchor="middle">HỘP ĐIỆN TRỞ CẦN ĐO Rx</text>
+            <rect x="845" y="115" width="165" height="80" rx="8" fill="#09090b" stroke="#52525b" stroke-width="2.5"/>
+            <rect x="890" y="142" width="75" height="26" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+            <text x="927" y="159" font-size="12" font-weight="bold" fill="#92400e" text-anchor="middle">Rx mẫu</text>
+          </g>
+        `;
+      }
+      layerDevices.innerHTML = html;
+    }
+
+    function getBai1RealTerminals(showRx) {
+      const list = [
+        { id: "G_L", label: "Điện kế G (Chốt trái)", x: 148, y: 212, color: "#18181b" },
+        { id: "G_R", label: "Điện kế G (Chốt phải)", x: 222, y: 212, color: "#18181b" },
+        { id: "A_NEG", label: "Ampe kế A (-)", x: 348, y: 212, color: "#18181b" },
+        { id: "A_POS", label: "Ampe kế A (+)", x: 422, y: 212, color: "#dc2626" },
+        { id: "SRC_POS", label: "Nguồn DC (+)", x: 538, y: 305, color: "#dc2626" },
+        { id: "SRC_NEG", label: "Nguồn DC (-)", x: 612, y: 305, color: "#18181b" },
+        { id: "EX_POS", label: "Nguồn chuẩn Ex (+)", x: 265, y: 348, color: "#dc2626" },
+        { id: "EX_NEG", label: "Nguồn chuẩn Ex (-)", x: 342, y: 348, color: "#18181b" },
+
+        // 7 chốt thẳng hàng dưới đáy hộp (Hình 4)
+        { id: "B_X", label: "Chốt X (Trên bảng)", x: 115, y: 455, color: "#18181b" },
+        { id: "B_RX_L", label: "Chốt Rx (Trái)", x: 205, y: 455, color: "#18181b" },
+        { id: "B_RX_R", label: "Chốt Rx (Phải / Nút giữa)", x: 275, y: 455, color: "#18181b" },
+        { id: "B_Z", label: "Chốt Z (Giữa bảng)", x: 365, y: 455, color: "#18181b" },
+        { id: "B_R0_L", label: "Chốt R0 (Trái / Nút giữa)", x: 455, y: 455, color: "#18181b" },
+        { id: "B_R0_R", label: "Chốt R0 (Phải)", x: 525, y: 455, color: "#18181b" },
+        { id: "B_Y", label: "Chốt Y (Trên bảng)", x: 625, y: 455, color: "#18181b" },
+
+        // Thước cầu
+        { id: "RULER_X", label: "Đầu thước X", x: 65, y: 632, color: "#dc2626" },
+        { id: "RULER_Z", label: "Con chạy Z (Thước)", x: 368, y: 628, color: "#2563eb" },
+        { id: "RULER_Y", label: "Đầu thước Y", x: 685, y: 632, color: "#dc2626" },
+
+        // Hộp R0 đen
+        // Hộp R0 đen thật: 4 giắc ở CẠNH PHẢI hộp, giắc dưới cùng là COM (theo ảnh thật)
+        { id: "BOX_R0_TOP", label: "Hộp R0 (Giắc 1 - trên cùng, cạnh phải)", x: 1078, y: 360, color: "#18181b" },
+        { id: "BOX_R0_MID", label: "Hộp R0 (Giắc 2, cạnh phải)", x: 1078, y: 440, color: "#18181b" },
+        { id: "BOX_R0_LOW", label: "Hộp R0 (Giắc 3, cạnh phải)", x: 1078, y: 520, color: "#18181b" },
+        { id: "BOX_R0_COM", label: "Hộp R0 (Giắc COM - dưới cùng, cạnh phải)", x: 1078, y: 600, color: "#18181b" }
+      ];
+      if (showRx) {
+        list.push(
+          { id: "EXT_RX_1", label: "Hộp Rx (Chốt Đỏ)", x: 865, y: 155, color: "#dc2626" },
+          { id: "EXT_RX_2", label: "Hộp Rx (Chốt Đen)", x: 990, y: 155, color: "#18181b" }
+        );
+      }
+      return list;
+    }
+
+    /* ==================== BÀI 2 (TỤ PHẲNG & ĐIỆN TRƯỜNG KẾ) ==================== */
+    function drawBai2RealBench() {
+      layerDevices.innerHTML = `
+        <!-- 1. BỘ NGUỒN CAO ÁP 4 ĐỒNG HỒ (BÊN TRÁI - ĐÚNG HÌNH 3 & ẢNH CHỤP) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="45" y="160" width="380" height="270" rx="8" fill="#e7e5e4" stroke="#78716c" stroke-width="3"/>
+          <rect x="60" y="175" width="350" height="240" rx="4" fill="#d6d3d1" stroke="#57534e" stroke-width="2"/>
+          <text x="235" y="198" font-size="12" font-weight="bold" fill="#1c1917" text-anchor="middle">BỘ NGUỒN CAO ÁP DC (0 - 3 kV)</text>
+
+          <!-- 4 đồng hồ mặt trước như Hình 3 -->
+          ${[0, 1, 2, 3].map(i => {
+            let x = 78 + i * 82;
+            return `
+              <rect x="${x}" y="215" width="68" height="58" rx="4" fill="#ffffff" stroke="#292524" stroke-width="2"/>
+              <path d="M ${x+10} 260 Q ${x+34} 230 ${x+58} 260" fill="none" stroke="#44403c" stroke-width="1.5"/>
+              <line x1="${x+34}" y1="262" x2="${x+24}" y2="235" stroke="#dc2626" stroke-width="1.8"/>
+              <circle cx="${x+34}" cy="312" r="16" fill="#292524" stroke="#78716c" stroke-width="2"/>
+            `;
+          }).join("")}
+
+          <text x="155" y="395" font-size="10.5" font-weight="bold" fill="#1c1917" class="aux-hint">MASS (Đất)</text>
+          <text x="310" y="395" font-size="10.5" font-weight="bold" fill="#dc2626" class="aux-hint">CAO ÁP (+/-)</text>
+        </g>
+
+        <!-- 2. HỘP ĐIỆN TRỞ BẢO VỆ (14) MÀU XÁM Ở GIỮA BÀN (GIỐNG ẢNH CHỤP) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="465" y="330" width="145" height="75" rx="6" fill="#d6d3d1" stroke="#78716c" stroke-width="2.5"/>
+          <rect x="512" y="355" width="50" height="22" fill="#ffffff" stroke="#1c1917" stroke-width="1.5"/>
+          <text x="537" y="370" font-size="9.5" font-weight="bold" fill="#1c1917" text-anchor="middle">R bảo vệ (14)</text>
+        </g>
+
+        <!-- 3. TỤ ĐIỆN PHẲNG (ĐĨA 10-11) & ĐIỆN TRƯỜNG KẾ (PHÍA TRÊN PHẢI) -->
+        <g filter="url(#drop-shadow)">
+          <!-- Khung đế máy đo điện trường kế -->
+          <rect x="615" y="135" width="210" height="165" rx="6" fill="#9ca3af" stroke="#4b5563" stroke-width="3"/>
+          <!-- Tấm nhựa vuông màu trắng đỡ bản tụ -->
+          <polygon points="590,145 850,145 830,215 610,215" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+          <!-- Đĩa cực trên (11) màu xám đen tròn và trục kim loại đứng -->
+          <ellipse cx="720" cy="175" rx="82" ry="32" fill="#4b5563" stroke="#1f2937" stroke-width="3"/>
+          <ellipse cx="720" cy="172" rx="45" ry="18" fill="#374151" stroke="#111827" stroke-width="2"/>
+          <!-- Trục đứng ở tâm đĩa trên -->
+          <rect x="714" y="85" width="12" height="78" rx="3" fill="#9ca3af" stroke="#374151" stroke-width="2"/>
+          <text x="720" y="72" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">(12) Chốt bản cực trên</text>
+
+          <!-- Mặt điều khiển Điện trường kế bên dưới đĩa -->
+          <rect x="630" y="225" width="180" height="62" rx="4" fill="#e5e7eb" stroke="#374151" stroke-width="1.5"/>
+          <text x="720" y="242" font-size="10" font-weight="bold" fill="#111827" text-anchor="middle">ĐIỆN TRƯỜNG KẾ (1000 V/cm)</text>
+          <!-- Núm chỉnh Zero (15) -->
+          <circle cx="775" cy="262" r="11" fill="#1f2937" stroke="#6b7280" stroke-width="2"/>
+          <text x="775" y="283" font-size="8.5" font-weight="bold" fill="#111827" text-anchor="middle" class="aux-hint">Zero (15)</text>
+        </g>
+
+        <!-- 4. THANH NỐI ĐẤT CẦM TAY (13) BÊN PHẢI -->
+        <g filter="url(#drop-shadow)">
+          <rect x="665" y="385" width="95" height="16" rx="8" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+          <text x="712" y="418" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle">(13) Thanh nối đất cầm tay</text>
+        </g>
+
+        <!-- 5. ĐỒNG HỒ VẠN NĂNG SỐ (VÔN KẾ DC 3V - BÊN PHẢI) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="885" y="245" width="195" height="275" rx="12" fill="#15803d" stroke="#14532d" stroke-width="4"/>
+          <rect x="900" y="260" width="165" height="245" rx="8" fill="#1e293b"/>
+          <!-- Màn hình LCD -->
+          <rect x="915" y="275" width="135" height="52" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+          <text x="982" y="310" font-size="24" font-family="monospace" font-weight="bold" fill="#0f172a" text-anchor="middle">1.45 V</text>
+          <!-- Núm xoay chọn thang 3 VDC -->
+          <circle cx="982" cy="385" r="40" fill="#334155" stroke="#64748b" stroke-width="2.5"/>
+          <line x1="982" y1="385" x2="955" y2="360" stroke="#facc15" stroke-width="3.5"/>
+          <text x="982" y="442" font-size="10" font-weight="bold" fill="#f8fafc" text-anchor="middle">VÔN KẾ (Thang 3 VDC)</text>
+          <text x="945" y="495" font-size="10" font-weight="bold" fill="#cbd5e1" text-anchor="middle" class="aux-hint">COM (-)</text>
+          <text x="1020" y="495" font-size="10" font-weight="bold" fill="#ef4444" text-anchor="middle" class="aux-hint">V (+)</text>
+        </g>
+      `;
+    }
+
+    function getBai2RealTerminals() {
+      return [
+        // Nguồn cao áp
+        { id: "HV_MASS", label: "Nguồn cao áp (Chốt Đất Xanh)", x: 155, y: 365, color: "#2563eb" },
+        { id: "HV_GND", label: "Nguồn cao áp (- / Đen)", x: 295, y: 365, color: "#18181b" },
+        { id: "HV_POS", label: "Nguồn cao áp (+ / Đỏ)", x: 345, y: 365, color: "#dc2626" },
+
+        // Hộp điện trở bảo vệ (14)
+        { id: "RES14_L", label: "Điện trở bảo vệ 14 (Chốt 1)", x: 490, y: 366, color: "#18181b" },
+        { id: "RES14_R", label: "Điện trở bảo vệ 14 (Chốt 2)", x: 585, y: 366, color: "#dc2626" },
+
+        // Chốt trên đỉnh bản cực tụ điện (12)
+        { id: "CAP_TOP_12", label: "Chốt nối bản cực trên (12)", x: 720, y: 92, color: "#dc2626" },
+
+        // Các chốt trên Điện trường kế
+        { id: "EM_GND_L", label: "Chốt đất Điện trường kế (Vỏ)", x: 648, y: 262, color: "#18181b" },
+        { id: "EM_OUT_POS", label: "Ngõ ra Điện trường kế (+)", x: 695, y: 262, color: "#dc2626" },
+        { id: "EM_OUT_NEG", label: "Ngõ ra Điện trường kế (-)", x: 735, y: 262, color: "#18181b" },
+
+        // Que nối đất cầm tay (13)
+        { id: "WAND_13", label: "Thanh nối đất cầm tay (13)", x: 665, y: 393, color: "#dc2626" },
+
+        // Đồng hồ Vôn kế
+        { id: "DMM2_COM", label: "Vôn kế (Chốt COM / -)", x: 945, y: 470, color: "#18181b" },
+        { id: "DMM2_V", label: "Vôn kế (Chốt V / +)", x: 1020, y: 470, color: "#dc2626" }
+      ];
+    }
+
+    /* ==================== BÀI 3 (CHUẨN BẢNG BKC.006E TRONG ẢNH MỚI) ==================== */
+    function drawBai3RealBench(mode) {
+      const orange = switches.sw_BOX3 && switches.sw_BOX3.value === "CAM 4 núm";
+      const rxOut = switches.sw_RX && switches.sw_RX.value === "RÚT RA";
+      const boxSvg = orange ? `
+        <!-- HỘP ĐIỆN TRỞ CAM 4 NÚM (PRECISION RESISTOR BOX) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="350" y="30" width="360" height="235" rx="10" fill="#ea580c" stroke="#9a3412" stroke-width="3.5"/>
+          <text x="530" y="100" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">PRECISION RESISTOR BOX</text>
+          ${[{x: 415, lbl: "x1000"}, {x: 490, lbl: "x100"}, {x: 570, lbl: "x10"}, {x: 645, lbl: "x1"}].map(d => `
+            <circle cx="${d.x}" cy="175" r="26" fill="#18181b" stroke="#fed7aa" stroke-width="2"/>
+            <circle cx="${d.x}" cy="175" r="15" fill="#e5e7eb"/>
+            <text x="${d.x}" y="228" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">${d.lbl}</text>
+          `).join("")}
+        </g>` : `
+        <!-- HỘP ĐIỆN TRỞ MẪU R0 ĐEN 6 NÚM XOAY (4 giắc ở cạnh trên: 2 đỏ ngoài, 2 đen giữa) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="350" y="30" width="360" height="235" rx="10" fill="#18181b" stroke="#3f3f46" stroke-width="3.5"/>
+          <text x="585" y="164" font-size="18" font-family="serif" font-style="italic" font-weight="bold" fill="#a1a1aa">R₀</text>
+          ${[
+            {x: 420, y: 112, lbl: "x1000"}, {x: 530, y: 112, lbl: "x100"}, {x: 640, y: 112, lbl: "x10"},
+            {x: 420, y: 205, lbl: "x1"},    {x: 530, y: 205, lbl: "x0.1"}, {x: 640, y: 205, lbl: "x0.01"}
+          ].map(d => `
+            <circle cx="${d.x}" cy="${d.y}" r="30" fill="#27272a" stroke="#52525b" stroke-width="2"/>
+            <circle cx="${d.x}" cy="${d.y}" r="19" fill="#09090b" stroke="#3f3f46" stroke-width="2"/>
+            <line x1="${d.x}" y1="${d.y}" x2="${d.x}" y2="${d.y-17}" stroke="#f8fafc" stroke-width="2"/>
+            <text x="${d.x}" y="${d.y+40}" font-size="9.5" font-weight="bold" fill="#a1a1aa" text-anchor="middle">${d.lbl}</text>
+          `).join("")}
+        </g>`;
+
+      layerDevices.innerHTML = `
+        <!-- 1. MÁY PHÁT TẦN SỐ FG-8020H (GÓC TRÊN TRÁI) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="25" y="30" width="275" height="165" rx="8" fill="#d6d3d1" stroke="#78716c" stroke-width="3"/>
+          <rect x="38" y="44" width="249" height="120" rx="4" fill="#44403c" stroke="#292524" stroke-width="2"/>
+          <text x="162" y="62" font-size="10" font-weight="bold" fill="#e7e5e4" text-anchor="middle">FUNCTION GENERATOR FG-8020H</text>
+          <rect x="48" y="72" width="85" height="32" rx="3" fill="#450a0a" stroke="#7f1d1d"/>
+          <text x="90" y="95" font-size="18" font-family="monospace" font-weight="bold" fill="#ef4444" text-anchor="middle">5463</text>
+          ${[0,1,2,3,4,5].map(i => `<rect x="${142 + i*19}" y="75" width="15" height="11" rx="2" fill="#a8a29e"/>`).join("")}
+          <circle cx="72" cy="132" r="15" fill="#a8a29e" stroke="#1c1917" stroke-width="2"/>
+          <circle cx="115" cy="132" r="11" fill="#a8a29e" stroke="#1c1917" stroke-width="2"/>
+          <circle cx="155" cy="132" r="11" fill="#a8a29e" stroke="#1c1917" stroke-width="2"/>
+          <circle cx="255" cy="135" r="9" fill="#e7e5e4" stroke="#1c1917" stroke-width="2"/>
+          <path d="M 255 144 C 255 190, 200 210, 200 245" fill="none" stroke="#18181b" stroke-width="4.5"/>
+        </g>
+
+        ${boxSvg}
+
+        <!-- 3. DAO ĐỘNG KÝ (GÓC TRÊN PHẢI) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="755" y="30" width="375" height="245" rx="8" fill="#d6d3d1" stroke="#78716c" stroke-width="3"/>
+          <text x="845" y="50" font-size="10.5" font-weight="bold" fill="#78350f">OSCILLOSCOPE 20MHz (CH1: X / CH2: Y)</text>
+          <rect x="772" y="60" width="165" height="140" rx="6" fill="#38bdf8" stroke="#44403c" stroke-width="4"/>
+          ${[1,2,3,4,5].map(i => `<line x1="${772 + i*27}" y1="60" x2="${772 + i*27}" y2="200" stroke="rgba(15,23,42,0.25)"/>`).join("")}
+          ${[1,2,3,4].map(i => `<line x1="772" y1="${60 + i*28}" x2="937" y2="${60 + i*28}" stroke="rgba(15,23,42,0.25)"/>`).join("")}
+          <rect x="950" y="60" width="162" height="175" rx="4" fill="#e7e5e4" stroke="#a8a29e"/>
+          <circle cx="985" cy="110" r="16" fill="#a8a29e" stroke="#44403c" stroke-width="2"/>
+          <circle cx="1065" cy="110" r="16" fill="#a8a29e" stroke="#44403c" stroke-width="2"/>
+          <text x="985" y="185" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">CH1 (X)</text>
+          <text x="1065" y="185" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">CH2 (Y)</text>
+          <circle cx="985" cy="205" r="9" fill="#374151" stroke="#111827" stroke-width="2"/>
+          <circle cx="1065" cy="205" r="9" fill="#374151" stroke="#111827" stroke-width="2"/>
+          <path d="M 985 214 L 970 285" stroke="#18181b" stroke-width="4.5"/>
+          <path d="M 1065 214 L 1055 285" stroke="#18181b" stroke-width="4.5"/>
+        </g>
+
+        <!-- 4. BẢNG BKC.006E (vẽ lại theo ảnh thật mới: GF trái, Rx trên, Mẫu C dưới, nhánh C//L bên phải) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="200" y="330" width="760" height="380" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="222" cy="348" r="5" fill="#94a3b8"/><circle cx="938" cy="348" r="5" fill="#94a3b8"/>
+          <circle cx="222" cy="692" r="5" fill="#94a3b8"/><circle cx="938" cy="692" r="5" fill="#94a3b8"/>
+          <text x="590" y="356" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">BÀI THÍ NGHIỆM</text>
+          <text x="590" y="374" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">KHẢO SÁT MẠCH CỘNG HƯỞNG RLC</text>
+          <text x="590" y="389" font-size="10" font-weight="bold" fill="#dc2626" text-anchor="middle">BKC.006E</text>
+
+          <!-- Thanh trên: GF(đỏ) ▸ ổ đỏ trái Rx ▸ [Rx] ▸ ổ đỏ phải Rx ▸ 2 ổ đỏ nhánh C, L -->
+          <polyline points="250,490 250,460 880,460 880,490" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+          <line x1="780" y1="460" x2="780" y2="490" stroke="#0f172a" stroke-width="2.2"/>
+
+          <!-- Hộp Rx (cắm trên thanh trên, giữa 2 ổ đỏ) - có thể rút ra, để lộ 2 lỗ cắm -->
+          ${rxOut ? `
+          <g>
+            <rect x="425" y="398" width="170" height="60" rx="6" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="510" y="420" font-size="10" fill="#64748b" text-anchor="middle">vị trí Rx (đã rút ra)</text>
+            <text x="510" y="436" font-size="9" fill="#64748b" text-anchor="middle">2 lỗ cắm để cắm Lx / Cx</text>
+          </g>` : `
+          <g>
+            <rect x="425" y="398" width="170" height="60" rx="6" fill="#18181b" stroke="#3f3f46" stroke-width="2"/>
+            <rect x="436" y="404" width="148" height="34" rx="3" fill="#facc15" stroke="#a16207"/>
+            <text x="510" y="414" font-size="10" font-style="italic" font-weight="bold" fill="#0f172a" text-anchor="middle">R<tspan font-size="7" dy="2">x</tspan></text>
+            <line x1="446" y1="424" x2="474" y2="424" stroke="#0f172a" stroke-width="1.6"/>
+            <rect x="474" y="418" width="36" height="12" fill="none" stroke="#0f172a" stroke-width="1.6"/>
+            <line x1="510" y1="424" x2="574" y2="424" stroke="#0f172a" stroke-width="1.6"/>
+          </g>`}
+
+          <!-- Nguồn GF (ký hiệu ~) -->
+          <text x="214" y="545" font-size="13" font-weight="bold" fill="#0f172a">GF</text>
+          <path d="M 213 556 q 5 -9 10 0 t 10 0" fill="none" stroke="#dc2626" stroke-width="1.8"/>
+
+          <!-- Thanh dưới: GF(đen) ▸ ổ đen 1 ▸ ổ đen 2 ▸ tụ mẫu C ▸ ổ đen 3 ▸ 2 ổ đen nhánh C, L -->
+          <polyline points="250,610 250,675 880,675 880,640" fill="none" stroke="#0f172a" stroke-width="2.2"/>
+          <line x1="780" y1="675" x2="780" y2="640" stroke="#0f172a" stroke-width="2.2"/>
+          <rect x="512" y="662" width="46" height="26" fill="#f8fafc" stroke="none"/>
+          <line x1="528" y1="662" x2="528" y2="688" stroke="#0f172a" stroke-width="2.8"/>
+          <line x1="542" y1="662" x2="542" y2="688" stroke="#0f172a" stroke-width="2.8"/>
+          <text x="535" y="652" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">C</text>
+
+          <!-- Khung nét đứt: nhánh C và nhánh L -->
+          <rect x="745" y="525" width="170" height="90" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-dasharray="6 4"/>
+          <line x1="780" y1="525" x2="780" y2="560" stroke="#0f172a" stroke-width="1.8"/>
+          <line x1="766" y1="560" x2="794" y2="560" stroke="#0f172a" stroke-width="2.8"/>
+          <line x1="766" y1="570" x2="794" y2="570" stroke="#0f172a" stroke-width="2.8"/>
+          <line x1="780" y1="570" x2="780" y2="615" stroke="#0f172a" stroke-width="1.8"/>
+          <text x="806" y="555" font-size="14" font-weight="bold" fill="#0f172a">C</text>
+          <line x1="880" y1="525" x2="880" y2="538" stroke="#0f172a" stroke-width="1.8"/>
+          <path d="M 880 538 q 9 5 0 10 q 9 5 0 10 q 9 5 0 10 q 9 5 0 10 q 9 5 0 10" fill="none" stroke="#0f172a" stroke-width="2"/>
+          <line x1="880" y1="588" x2="880" y2="615" stroke="#0f172a" stroke-width="1.8"/>
+          <text x="846" y="555" font-size="14" font-weight="bold" fill="#0f172a">L</text>
+        </g>
+      `;
+    }
+
+    function getBai3RealTerminals() {
+      return [
+        // Cáp FG-8020H
+        { id: "FG_RED", label: "FG-8020H (Giắc Đỏ / +)", x: 180, y: 255, color: "#dc2626" },
+        { id: "FG_BLK", label: "FG-8020H (Giắc Đen / -)", x: 222, y: 255, color: "#18181b" },
+
+        // 4 giắc trên đỉnh hộp R0 (2 đỏ ngoài dùng để cắm; 2 đen giữa không dùng)
+        { id: "BOX_R0_L", label: "Hộp R0 (Giắc Đỏ Trái)", x: 420, y: 55, color: "#dc2626" },
+        { id: "BOX_R0_M1", label: "Hộp R0 (Giắc Đen Giữa 1 - không dùng)", x: 495, y: 55, color: "#18181b" },
+        { id: "BOX_R0_M2", label: "Hộp R0 (Giắc Đen Giữa 2 - không dùng)", x: 565, y: 55, color: "#18181b" },
+        { id: "BOX_R0_R", label: "Hộp R0 (Giắc Đỏ Phải)", x: 640, y: 55, color: "#dc2626" },
+
+        // Dao động ký
+        { id: "OSC_X_RED", label: "CH1 / X+ (Giắc Đỏ)", x: 950, y: 295, color: "#dc2626" },
+        { id: "OSC_X_BLK", label: "CH1 / X- (Giắc Đen COM)", x: 988, y: 295, color: "#18181b" },
+        { id: "OSC_Y_RED", label: "CH2 / Y+ (Giắc Đỏ)", x: 1035, y: 295, color: "#dc2626" },
+        { id: "OSC_Y_BLK", label: "CH2 / Y- (Giắc Đen COM)", x: 1075, y: 295, color: "#18181b" },
+
+        // Bảng BKC.006E - thanh trên (ổ đỏ)
+        { id: "GF_TOP", label: "GF (ổ đỏ, góc trái - cắm giắc đỏ máy phát)", x: 250, y: 500, color: "#dc2626" },
+        { id: "TOP_A", label: "Ổ đỏ bên TRÁI hộp Rx", x: 385, y: 460, color: "#dc2626" },
+        { id: "TOP_B", label: "Ổ đỏ bên PHẢI hộp Rx", x: 640, y: 460, color: "#dc2626" },
+        // 2 lỗ cắm của vị trí Rx: chỉ lộ ra khi rút hộp Rx
+        { id: "RXS_L", label: "Lỗ cắm TRÁI tại vị trí Rx (khi đã rút Rx)", x: 455, y: 460, color: "#dc2626", rxOnly: true },
+        { id: "RXS_R", label: "Lỗ cắm PHẢI tại vị trí Rx (khi đã rút Rx)", x: 565, y: 460, color: "#dc2626", rxOnly: true },
+        { id: "CB_TOP", label: "Nhánh C - ổ đỏ trên", x: 780, y: 500, color: "#dc2626" },
+        { id: "LB_TOP", label: "Nhánh L - ổ đỏ trên", x: 880, y: 500, color: "#dc2626" },
+
+        // Bảng BKC.006E - thanh dưới (ổ đen)
+        { id: "GF_BOT", label: "GF (ổ đen, góc trái - cắm giắc đen máy phát)", x: 250, y: 600, color: "#18181b" },
+        { id: "BOT_1", label: "Ổ đen số 1 (thanh dưới, trước tụ mẫu C)", x: 330, y: 675, color: "#18181b" },
+        { id: "BOT_2", label: "Ổ đen số 2 (thanh dưới, ngay trước tụ mẫu C)", x: 450, y: 675, color: "#18181b" },
+        { id: "BOT_3", label: "Ổ đen số 3 (thanh dưới, sau tụ mẫu C)", x: 610, y: 675, color: "#18181b" },
+        { id: "CB_BOT", label: "Nhánh C - ổ đen dưới", x: 780, y: 640, color: "#18181b" },
+        { id: "LB_BOT", label: "Nhánh L - ổ đen dưới", x: 880, y: 640, color: "#18181b" }
+      ];
+    }
+
+    /* ==================== BÀI 4 (ỐNG DÂY SOLENOID & UNI-T ĐỎ) ==================== */
+    function drawBai4RealBench() {
+      layerDevices.innerHTML = `
+        <!-- 1. BỘ NGUỒN POWER SUPPLY AC-DC BKC-P.02 (BÊN TRÁI - ĐÚNG ẢNH CHỤP) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="45" y="80" width="215" height="295" rx="6" fill="#18181b" stroke="#09090b" stroke-width="3"/>
+          <rect x="55" y="165" width="195" height="200" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+          <text x="152" y="192" font-size="13" font-weight="bold" fill="#dc2626" text-anchor="middle">POWER SUPPLY</text>
+          <text x="152" y="208" font-size="11" font-weight="bold" fill="#dc2626" text-anchor="middle">AC - DC</text>
+          <text x="152" y="224" font-size="10" font-weight="bold" fill="#1e293b" text-anchor="middle">BKC - P.02</text>
+
+          <!-- Núm xoay chọn điện áp 0 - 3 - 6 - 9 - 12V -->
+          <circle cx="115" cy="300" r="24" fill="#18181b" stroke="#64748b" stroke-width="3"/>
+          <line x1="115" y1="300" x2="100" y2="282" stroke="#f8fafc" stroke-width="2.5"/>
+          <text x="82" y="295" font-size="9.5" font-weight="bold" fill="#dc2626">3</text>
+          <text x="98" y="270" font-size="9.5" font-weight="bold" fill="#dc2626">6</text>
+          <text x="128" y="270" font-size="9.5" font-weight="bold" fill="#dc2626">9</text>
+          <text x="145" y="295" font-size="9.5" font-weight="bold" fill="#dc2626">12</text>
+
+          <text x="182" y="275" font-size="10" font-weight="bold" fill="#0f172a" class="aux-hint">DC (-/+)</text>
+          <text x="182" y="342" font-size="10" font-weight="bold" fill="#dc2626" class="aux-hint">AC (~)</text>
+        </g>
+
+        <!-- 2. ỐNG DÂY ĐỒNG SOLENOID DÀI TRÊN ĐẾ ĐEN (PHÍA TRÊN GIỮA) -->
+        <g filter="url(#drop-shadow)">
+          <!-- Đế nhựa đen -->
+          <rect x="355" y="135" width="490" height="115" rx="6" fill="#18181b" stroke="#475569" stroke-width="3"/>
+          <!-- Ống dây đồng tròn nằm ngang trên 2 giá đỡ mica trong -->
+          <rect x="395" y="75" width="410" height="68" rx="6" fill="url(#copper-grad)" stroke="#451a03" stroke-width="3"/>
+          <rect x="385" y="68" width="14" height="115" rx="2" fill="rgba(241,245,249,0.65)" stroke="#94a3b8"/>
+          <rect x="801" y="68" width="14" height="115" rx="2" fill="rgba(241,245,249,0.65)" stroke="#94a3b8"/>
+          <!-- Thước kim loại của đầu dò cảm ứng từ B xuyên dọc trục ống dây -->
+          <rect x="815" y="102" width="150" height="14" fill="#cbd5e1" stroke="#475569"/>
+          <!-- Nhãn vàng và nhãn trắng trên đế đen -->
+          <rect x="575" y="185" width="100" height="45" rx="2" fill="#fde047" stroke="#a16207"/>
+          <rect x="685" y="180" width="130" height="52" rx="3" fill="#f8fafc" stroke="#94a3b8"/>
+          <text x="750" y="202" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">NGHIÊN CỨU TỪ TRƯỜNG</text>
+          <text x="750" y="216" font-size="9.5" fill="#334155" text-anchor="middle">ỐNG DÂY THẲNG DÀI</text>
+        </g>
+
+        <!-- 3. MÁY ĐO TỪ THÔNG KẾ TESLA METER VC-8606 (GÓC TRÊN PHẢI) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="910" y="20" width="215" height="145" rx="8" fill="#cbd5e1" stroke="#0284c7" stroke-width="3"/>
+          <rect x="925" y="35" width="185" height="115" rx="4" fill="#e2e8f0" stroke="#475569"/>
+          <rect x="945" y="48" width="110" height="40" rx="3" fill="#18181b"/>
+          <text x="1000" y="75" font-size="22" font-family="monospace" font-weight="bold" fill="#ef4444" text-anchor="middle">1.57</text>
+          <text x="1015" y="112" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">TESLA METER VC-8606</text>
+        </g>
+
+        <!-- 4. BIẾN TRỞ CON CHẠY RhS20-2 (Ở GIỮA BÀN - ĐÚNG ẢNH CHỤP) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="330" y="285" width="295" height="105" rx="6" fill="#09090b" stroke="#3f3f46" stroke-width="2.5"/>
+          <!-- Thân ống sứ quấn dây biến trở -->
+          <rect x="375" y="305" width="205" height="42" rx="4" fill="#52525b" stroke="#27272a" stroke-width="2"/>
+          <rect x="405" y="305" width="145" height="42" fill="#27272a"/>
+          <!-- Thanh trượt và con chạy ở trên -->
+          <line x1="365" y1="295" x2="590" y2="295" stroke="#a1a1aa" stroke-width="5"/>
+          <rect x="465" y="282" width="38" height="32" rx="3" fill="#18181b" stroke="#e4e4e7" stroke-width="1.5"/>
+          <!-- Nhãn RhS20-2 góc dưới trái -->
+          <rect x="342" y="352" width="68" height="24" rx="2" fill="#e2e8f0"/>
+          <text x="376" y="368" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle">RhS20-2</text>
+        </g>
+
+        <!-- 5. ĐỒNG HỒ VẠN NĂNG SỐ MÀU ĐỎ UNI-T (PHÍA DƯỚI GIỮA - ĐÚNG ẢNH CHỤP) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="365" y="425" width="175" height="265" rx="22" fill="#dc2626" stroke="#991b1b" stroke-width="4"/>
+          <rect x="380" y="440" width="145" height="235" rx="14" fill="#1e293b"/>
+          <!-- Màn hình LCD hiện 00.35 -->
+          <rect x="392" y="455" width="120" height="52" rx="4" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+          <text x="452" y="490" font-size="25" font-family="monospace" font-weight="bold" fill="#0f172a" text-anchor="middle">00.35</text>
+          <!-- Núm xoay tròn ở giữa -->
+          <circle cx="452" cy="568" r="38" fill="#09090b" stroke="#475569" stroke-width="2.5"/>
+          <line x1="452" y1="532" x2="452" y2="604" stroke="#334155" stroke-width="6"/>
+          <!-- 4 lỗ cắm hàng dưới: 20A, mA, COM, VΩ -->
+          <text x="398" y="632" font-size="9" font-weight="bold" fill="#facc15" text-anchor="middle" class="aux-hint">20A</text>
+          <text x="434" y="632" font-size="9" fill="#cbd5e1" text-anchor="middle" class="aux-hint">mA</text>
+          <text x="470" y="632" font-size="9" font-weight="bold" fill="#f8fafc" text-anchor="middle" class="aux-hint">COM</text>
+          <text x="506" y="632" font-size="9" fill="#cbd5e1" text-anchor="middle" class="aux-hint">V/Ω</text>
+        </g>
+      `;
+    }
+
+    function getBai4RealTerminals() {
+      return [
+        // Nguồn BKC-P.02: 2 chốt DC trên, 2 chốt AC dưới
+        { id: "P02_DC_NEG", label: "Nguồn BKC-P.02 (DC - / Đen)", x: 222, y: 265, color: "#18181b" },
+        { id: "P02_DC_POS", label: "Nguồn BKC-P.02 (DC + / Đỏ)", x: 222, y: 295, color: "#dc2626" },
+        { id: "P02_AC_1", label: "Nguồn BKC-P.02 (AC ~ Trên)", x: 228, y: 332, color: "#dc2626" },
+        { id: "P02_AC_2", label: "Nguồn BKC-P.02 (AC ~ Dưới)", x: 228, y: 358, color: "#dc2626" },
+
+        // 2 chốt Đỏ trên đế Ống dây Solenoid dài
+        { id: "SOL4_L", label: "Ống dây Solenoid (Chốt Đỏ Trái)", x: 432, y: 215, color: "#dc2626" },
+        { id: "SOL4_R", label: "Ống dây Solenoid (Chốt Đỏ Phải)", x: 492, y: 215, color: "#dc2626" },
+
+        // 3 chốt Đỏ trên Biến trở con chạy RhS20-2
+        { id: "RHEO_BOT_L", label: "Biến trở RhS20-2 (Chốt đầu dây Trái)", x: 382, y: 355, color: "#dc2626" },
+        { id: "RHEO_BOT_R", label: "Biến trở RhS20-2 (Chốt đầu dây Phải)", x: 525, y: 365, color: "#dc2626" },
+        { id: "RHEO_SLIDER", label: "Biến trở RhS20-2 (Chốt con chạy Trên)", x: 575, y: 295, color: "#dc2626" },
+
+        // 4 chốt trên đồng hồ vạn năng đỏ UNI-T
+        { id: "UNIT_20A", label: "Đồng hồ UNI-T (Chốt 20A)", x: 398, y: 650, color: "#dc2626" },
+        { id: "UNIT_MA", label: "Đồng hồ UNI-T (Chốt mA)", x: 434, y: 650, color: "#18181b" },
+        { id: "UNIT_COM", label: "Đồng hồ UNI-T (Chốt COM)", x: 470, y: 650, color: "#18181b" },
+        { id: "UNIT_V", label: "Đồng hồ UNI-T (Chốt V/Ω)", x: 506, y: 650, color: "#dc2626" }
+      ];
+    }
+
+    /* ==================== BÀI 5 (ĐƯỜNG CONG TỪ TRỄ & HỘP CAM) ==================== */
+    function drawBai5RealBench(mode) {
+      const isScope = mode === "scope";
+      const rIn = switches.sw_R && switches.sw_R.value === "CẮM";
+      const cIn = switches.sw_C && switches.sw_C.value === "CẮM";
+      const grid = (() => {
+        let g = "";
+        for (let i = 0; i <= 8; i++) g += `<line x1="${50 + i * 25}" y1="335" x2="${50 + i * 25}" y2="525" stroke="#67e8f9" stroke-opacity="0.45"/>`;
+        for (let j = 0; j <= 8; j++) g += `<line x1="50" y1="${335 + j * 23.75}" x2="250" y2="${335 + j * 23.75}" stroke="#67e8f9" stroke-opacity="0.45"/>`;
+        return g;
+      })();
+      const socket = (x, y, fill) => `<circle cx="${x}" cy="${y}" r="13" fill="${fill}" stroke="#1f2937" stroke-width="2.5"/><circle cx="${x}" cy="${y}" r="5" fill="#09090b"/>`;
+
+      const instrument = isScope ? `
+        <!-- DAO ĐỘNG KÝ ĐIỆN TỬ 2 KÊNH (chế độ X-Y) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="30" y="300" width="390" height="380" rx="8" fill="#e5e7eb" stroke="#9ca3af" stroke-width="3"/>
+          <text x="225" y="322" font-size="11" font-weight="bold" fill="#1e293b" text-anchor="middle">DAO ĐỘNG KÝ ĐIỆN TỬ 2 KÊNH (Mode X-Y)</text>
+          <rect x="50" y="335" width="200" height="190" rx="6" fill="#0e7490" stroke="#334155" stroke-width="4"/>
+          ${grid}
+          <circle cx="150" cy="430" r="3" fill="#bef264"/>
+          <rect x="270" y="335" width="135" height="300" rx="4" fill="#d1d5db" stroke="#9ca3af"/>
+          <circle cx="305" cy="385" r="14" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+          <circle cx="370" cy="385" r="14" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+          <circle cx="305" cy="445" r="14" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+          <circle cx="370" cy="445" r="14" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+          <text x="307" y="590" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">CH1 (X)</text>
+          <text x="377" y="590" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">CH2 (Y)</text>
+          <text x="338" y="625" font-size="9" fill="#475569" text-anchor="middle" class="aux-hint">đỏ: tín hiệu · đen: COM</text>
+        </g>` : `
+        <!-- CASSY-S (LEYBOLD) theo ảnh sản phẩm: INPUT A (I, U, ⏚), INPUT B (U, ⏚), cổng 15 chân, dải R/S -->
+        <g filter="url(#drop-shadow)">
+          <rect x="300" y="30" width="400" height="195" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3"/>
+          <rect x="304" y="218" width="392" height="5" rx="2.5" fill="#4ade80" opacity="0.85"/>
+          <text x="500" y="48" font-size="11" font-weight="bold" fill="#475569" text-anchor="middle" letter-spacing="2">LEYBOLD · CASSY-S</text>
+          <!-- Panel INPUT A -->
+          <rect x="315" y="58" width="205" height="118" rx="5" fill="#cbd5e1" stroke="#94a3b8"/>
+          <text x="417" y="75" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">INPUT A</text>
+          ${socket(350, 108, "#dc2626")}
+          <text x="350" y="135" font-size="8.5" font-weight="bold" fill="#0f172a" text-anchor="middle">I · 3 A</text>
+          <text x="417" y="135" font-size="8.5" font-weight="bold" fill="#0f172a" text-anchor="middle">U · 250 V</text>
+          <text x="484" y="135" font-size="8.5" font-weight="bold" fill="#0f172a" text-anchor="middle">⏚ · 250 V CAT II</text>
+          <rect x="380" y="146" width="75" height="20" rx="3" fill="#475569" stroke="#1f2937"/>
+          <!-- Panel INPUT B -->
+          <rect x="530" y="58" width="155" height="118" rx="5" fill="#cbd5e1" stroke="#94a3b8"/>
+          <text x="607" y="75" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">INPUT B</text>
+          <text x="568" y="135" font-size="8.5" font-weight="bold" fill="#0f172a" text-anchor="middle">U · 250 V</text>
+          <text x="640" y="135" font-size="8.5" font-weight="bold" fill="#0f172a" text-anchor="middle">⏚ · CAT II</text>
+          <rect x="570" y="146" width="75" height="20" rx="3" fill="#475569" stroke="#1f2937"/>
+          <!-- Dải dưới: R, S, nguồn, USB -->
+          <rect x="315" y="184" width="370" height="28" rx="4" fill="#94a3b8" stroke="#64748b"/>
+          <circle cx="345" cy="198" r="7" fill="#1f2937"/><circle cx="375" cy="198" r="7" fill="#1f2937"/><circle cx="405" cy="198" r="7" fill="#1f2937"/>
+          <text x="345" y="217" font-size="7.5" fill="#334155" text-anchor="middle">R</text>
+          <text x="490" y="203" font-size="9" font-weight="bold" fill="#1e293b" text-anchor="middle">LEYBOLD</text>
+          <rect x="655" y="190" width="22" height="16" rx="2" fill="#475569"/>
+        </g>
+        <!-- MÁY TÍNH (CASSY Lab) -->
+        <g filter="url(#drop-shadow)">
+          <path d="M 667 225 C 700 300, 230 290, 215 365" fill="none" stroke="#64748b" stroke-width="4"/>
+          <text x="440" y="292" font-size="9" fill="#475569" class="aux-hint">cáp USB</text>
+          <rect x="60" y="365" width="310" height="230" rx="8" fill="#1e293b" stroke="#0f172a" stroke-width="4"/>
+          <rect x="75" y="380" width="280" height="190" rx="3" fill="#f8fafc"/>
+          <text x="215" y="405" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">MÁY TÍNH – CASSY Lab 2</text>
+          <path d="M 120 540 C 160 540, 170 500, 190 480 C 205 462, 225 455, 250 455" fill="none" stroke="#94a3b8" stroke-width="2"/>
+          <text x="215" y="560" font-size="9" fill="#475569" text-anchor="middle">UA1 = Ux · UB1 = Uy</text>
+        </g>`;
+
+      layerDevices.innerHTML = `
+        ${instrument}
+
+        <!-- BỘ NGUỒN XOAY CHIỀU (AC ~) -->
+        <g filter="url(#drop-shadow)">
+          <rect x="40" y="40" width="215" height="190" rx="6" fill="#18181b" stroke="#09090b" stroke-width="3"/>
+          <rect x="52" y="100" width="191" height="118" rx="3" fill="#f8fafc" stroke="#cbd5e1"/>
+          <text x="147" y="120" font-size="10" font-weight="bold" fill="#dc2626" text-anchor="middle">BỘ NGUỒN AC - DC</text>
+          <text x="147" y="133" font-size="9" font-weight="bold" fill="#1e293b" text-anchor="middle">(chọn AC ~ 9 V / 50 Hz)</text>
+          <circle cx="95" cy="178" r="20" fill="#18181b" stroke="#64748b" stroke-width="2"/>
+          <line x1="95" y1="178" x2="104" y2="164" stroke="#f8fafc" stroke-width="2"/>
+          <text x="95" y="210" font-size="9.5" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">9 V</text>
+          <text x="168" y="148" font-size="10" font-weight="bold" fill="#dc2626" class="aux-hint">AC ~</text>
+        </g>
+
+        <!-- BẢNG MẠCH BKC.013E -->
+        <g filter="url(#drop-shadow)">
+          <rect x="450" y="250" width="680" height="318" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3"/>
+          <text x="790" y="272" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">BÀI THÍ NGHIỆM</text>
+          <text x="790" y="286" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">KHẢO SÁT HIỆN TƯỢNG TỪ TRỄ</text>
+          <text x="790" y="300" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">XÁC ĐỊNH NĂNG LƯỢNG TỔN HAO TỪ HÓA SẮT TỪ</text>
+          <text x="790" y="313" font-size="9.5" font-weight="bold" fill="#dc2626" text-anchor="middle">BKC.013E</text>
+
+          <!-- ===== MẠCH IN NỐI SẴN ===== -->
+          <g fill="none" stroke="#0f172a" stroke-width="2">
+            <!-- GF trên ➔ chốt phụ ➔ N1 trên -->
+            <path d="M 490 370 L 715 370"/>
+            <!-- N1 dưới ➔ ổ phải R1 -->
+            <path d="M 715 450 L 655 450 L 655 470"/>
+            <!-- GF dưới ➔ ổ trái R1 (COM) -->
+            <path d="M 490 470 L 545 470"/>
+            <!-- R1 ➔ Ux (nối sẵn từng cặp ổ) -->
+            <path d="M 545 470 L 545 515"/>
+            <path d="M 655 470 L 655 515"/>
+            <!-- N2 dưới ➔ đáy mẫu R -->
+            <path d="M 805 450 L 832 450 L 832 512 L 875 512 L 875 490"/>
+            <!-- đỉnh mẫu R ➔ đỉnh mẫu C (điểm Uy+) ➔ ổ Uy trên -->
+            <path d="M 875 340 L 875 330 L 965 330 L 965 340"/>
+            <path d="M 965 330 L 1040 330 L 1040 370"/>
+            <!-- N2 trên ➔ đáy mẫu C (điểm Uy-) ➔ ổ Uy dưới -->
+            <path d="M 805 370 L 828 370 L 828 320 L 1105 320 L 1105 537 L 965 537 L 965 490"/>
+            <path d="M 1040 450 L 1040 537"/>
+          </g>
+          <line x1="490" y1="370" x2="490" y2="470" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="462" y="425" font-size="10.5" font-weight="bold" fill="#0f172a">GF</text>
+
+          <!-- R1 (hộp điện trở thập phân cắm vào 2 ổ hàng trên) -->
+          <rect x="545" y="458" width="110" height="24" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-dasharray="5,4"/>
+          <text x="600" y="475" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">R1</text>
+          <text x="522" y="455" font-size="8.5" font-weight="bold" fill="#475569" class="aux-hint">COM</text>
+          <!-- Ux (2 ổ riêng hàng dưới) -->
+          <path d="M 545 540 L 545 531 M 655 540 L 655 531 M 545 540 L 655 540" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+          <path d="M 540 536 L 545 530 L 550 536 M 650 536 L 655 530 L 660 536" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+          <text x="600" y="557" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">Ux</text>
+
+          <!-- Biến áp lõi sắt từ (nối sẵn trong bảng) -->
+          <rect x="715" y="345" width="90" height="135" rx="4" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+          <rect x="735" y="362" width="50" height="100" rx="3" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+          <text x="760" y="416" font-size="10" font-weight="bold" fill="#713f12" text-anchor="middle">BIẾN ÁP</text>
+          <text x="727" y="474" font-size="9" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">N1</text>
+          <text x="793" y="474" font-size="9" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">N2</text>
+          <text x="600" y="412" font-size="8.5" fill="#475569" text-anchor="middle">N1=400 · N2=850</text>
+          <text x="600" y="424" font-size="8.5" fill="#475569" text-anchor="middle">S=60 mm² · l=51 mm</text>
+
+          <!-- Ổ lắp mẫu R = 1 MΩ (đặt dọc) -->
+          ${rIn
+            ? `<rect x="845" y="340" width="60" height="150" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="2"/>
+               <text transform="rotate(-90 875 385)" x="875" y="389" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">R = 1 MΩ</text>`
+            : `<rect x="845" y="340" width="60" height="150" rx="4" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,4"/>
+               <text transform="rotate(-90 875 385)" x="875" y="389" font-size="10" fill="#64748b" text-anchor="middle">ổ cắm mẫu R</text>`}
+          <!-- Ổ lắp mẫu C = 0,68 µF (đặt dọc) -->
+          ${cIn
+            ? `<rect x="935" y="340" width="60" height="150" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="2"/>
+               <text transform="rotate(-90 965 385)" x="965" y="389" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">C = 0,68 µF</text>`
+            : `<rect x="935" y="340" width="60" height="150" rx="4" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,4"/>
+               <text transform="rotate(-90 965 385)" x="965" y="389" font-size="10" fill="#64748b" text-anchor="middle">ổ cắm mẫu C</text>`}
+
+          <!-- Uy đặt dọc, song song với C -->
+          <path d="M 1068 370 L 1068 450 M 1068 370 L 1053 370 M 1068 450 L 1053 450 M 1058 365 L 1052 370 L 1058 375 M 1058 445 L 1052 450 L 1058 455" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+          <text x="1086" y="414" font-size="10.5" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">Uy</text>
+        </g>
+
+        <!-- HỘP ĐIỆN TRỞ THẬP PHÂN MÀU CAM (PRECISION RESISTOR BOX) = R1 -->
+        <g filter="url(#drop-shadow)">
+          <rect x="600" y="585" width="530" height="120" rx="8" fill="#ea580c" stroke="#9a3412" stroke-width="3.5"/>
+          <text x="820" y="607" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">PRECISION RESISTOR BOX (R1)</text>
+          ${[
+            {x: 670, lbl: "x1000"},
+            {x: 770, lbl: "x100"},
+            {x: 870, lbl: "x10"},
+            {x: 970, lbl: "x1"}
+          ].map(d => `
+            <circle cx="${d.x}" cy="653" r="22" fill="#18181b" stroke="#fed7aa" stroke-width="2"/>
+            <circle cx="${d.x}" cy="653" r="12" fill="#e5e7eb"/>
+            <text x="${d.x}" y="692" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">${d.lbl}</text>
+          `).join("")}
+        </g>
+      `;
+    }
+
+    function getBai5RealTerminals(mode) {
+      const list = [
+        // Nguồn xoay chiều
+        { id: "P01_AC_1", label: "Nguồn AC ~ (chốt đỏ)", x: 200, y: 160, color: "#dc2626" },
+        { id: "P01_AC_2", label: "Nguồn AC ~ (chốt đen)", x: 200, y: 195, color: "#18181b" },
+
+        // Bảng BKC.013E (biến áp, R, C đã nối sẵn bằng mạch in)
+        { id: "B5_GF_TOP", label: "Bảng - GF (ổ trên, nối sẵn tới chốt phụ và N1)", x: 490, y: 370, color: "#dc2626" },
+        { id: "B5_GF_BOT", label: "Bảng - GF (ổ dưới, nối sẵn tới ổ trái R1 = COM)", x: 490, y: 470, color: "#18181b" },
+        { id: "B5_TAP", label: "Bảng - Chốt phụ giữa GF trên và biến áp (nối thông GF trên)", x: 590, y: 370, color: "#dc2626" },
+        { id: "B5_R1_L", label: "Bảng - R1 (ổ trái, hàng trên)", x: 545, y: 470, color: "#18181b" },
+        { id: "B5_R1_R", label: "Bảng - R1 (ổ phải, hàng trên, nối sẵn tới N1)", x: 655, y: 470, color: "#dc2626" },
+        { id: "B5_UX_L", label: "Bảng - Ux (ổ trái, hàng dưới, nối sẵn với R1 trái)", x: 545, y: 515, color: "#18181b" },
+        { id: "B5_UX_R", label: "Bảng - Ux (ổ phải, hàng dưới, nối sẵn với R1 phải)", x: 655, y: 515, color: "#dc2626" },
+        { id: "B5_C_A", label: "Bảng - Uy (+) (ổ trên, cạnh tụ C, điểm nối R-C)", x: 1040, y: 370, color: "#dc2626" },
+        { id: "B5_C_B", label: "Bảng - Uy (−) (ổ dưới, cạnh tụ C, nối sẵn tới N2)", x: 1040, y: 450, color: "#2563eb" },
+
+        // Hộp điện trở cam (R1)
+        { id: "ORANGE_R_1", label: "Hộp điện trở cam R1 (chốt đỏ)", x: 1105, y: 625, color: "#dc2626" },
+        { id: "ORANGE_R_2", label: "Hộp điện trở cam R1 (chốt đen)", x: 1105, y: 670, color: "#18181b" }
+      ];
+      if (mode === "scope") {
+        list.push(
+          { id: "B5_OSC_X_RED", label: "Dao động ký CH1 / X (tín hiệu - đỏ)", x: 290, y: 612, color: "#dc2626" },
+          { id: "B5_OSC_X_BLK", label: "Dao động ký CH1 / X (COM - đen)", x: 325, y: 612, color: "#18181b" },
+          { id: "B5_OSC_Y_RED", label: "Dao động ký CH2 / Y (tín hiệu - đỏ)", x: 360, y: 612, color: "#dc2626" },
+          { id: "B5_OSC_Y_BLK", label: "Dao động ký CH2 / Y (COM - đen)", x: 395, y: 612, color: "#18181b" }
+        );
+      } else {
+        list.push(
+          { id: "DAQ_A_POS", label: "CASSY-S INPUT A - ổ U (đỏ)", x: 417, y: 108, color: "#dc2626" },
+          { id: "DAQ_A_NEG", label: "CASSY-S INPUT A - ổ đất ⏚ (xanh dương)", x: 484, y: 108, color: "#2563eb" },
+          { id: "DAQ_B_POS", label: "CASSY-S INPUT B - ổ U (đỏ)", x: 568, y: 108, color: "#dc2626" },
+          { id: "DAQ_B_NEG", label: "CASSY-S INPUT B - ổ đất ⏚ (xanh dương)", x: 640, y: 108, color: "#2563eb" }
+        );
+      }
+      return list;
+    }
+
+    /* ==================== BÀI 6 (MAGNETRON CHUẨN 2 ẢNH MỚI NHẤT) ==================== */
+    function drawBai6RealBench() {
+      layerDevices.innerHTML = `
+        <g filter="url(#drop-shadow)">
+          <rect x="110" y="25" width="930" height="660" rx="8" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="5"/>
+          <rect x="126" y="41" width="898" height="628" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+
+          <text x="295" y="95" font-size="13.5" font-weight="bold" fill="#0f172a" text-anchor="middle">BỘ THÍ NGHIỆM</text>
+          <text x="295" y="152" font-size="11.5" font-weight="bold" fill="#dc2626" text-anchor="middle">BKC.002E</text>
+          <text x="295" y="115" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">XÁC ĐỊNH ĐIỆN TÍCH RIÊNG CỦA ELECTRON</text>
+          <text x="295" y="135" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">THEO PHƯƠNG PHÁP MAGNETRON</text>
+
+          <!-- 1. ĐỒNG HỒ AMPE KẾ A1 (TRÁI - 2 CHỐT DỌC BÊN PHẢI: + TRÊN, - DƯỚI) -->
+          <rect x="180" y="210" width="150" height="135" rx="6" fill="#78716c" stroke="#44403c" stroke-width="3"/>
+          <rect x="192" y="222" width="126" height="78" fill="#ffffff"/>
+          <path d="M 205 285 Q 255 235 305 285" fill="none" stroke="#334155" stroke-width="1.5"/>
+          <line x1="220" y1="288" x2="235" y2="242" stroke="#dc2626" stroke-width="2"/>
+          <text x="255" y="275" font-size="15" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+          <circle cx="255" cy="322" r="7" fill="#18181b"/>
+          <text x="192" y="397" font-size="12" font-weight="bold" fill="#0f172a" class="aux-hint">3A</text>
+          <text x="298" y="397" font-size="12" font-weight="bold" fill="#0f172a" class="aux-hint">5A</text>
+          <text x="380" y="268" font-size="13" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+          <text x="380" y="315" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">A1 (-)</text>
+
+          <!-- 2. CUỘN DÂY ĐỒNG SOLENOID CÓ VÀNH NHỰA VÀNG NGÀ & 2 CHỐT TRÊN ĐỈNH (GIỐNG ẢNH MỚI) -->
+          <circle cx="515" cy="275" r="76" fill="none" stroke="#334155" stroke-width="1.8"/>
+          <circle cx="515" cy="275" r="56" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+          <!-- Đế dưới cuộn dây -->
+          <ellipse cx="515" cy="285" rx="68" ry="48" fill="#d6d3d1" stroke="#78716c" stroke-width="2"/>
+          <!-- Thân dây đồng quấn -->
+          <rect x="467" y="175" width="96" height="105" rx="12" fill="url(#copper-grad)" stroke="#451a03" stroke-width="2"/>
+          <!-- Vành nhựa tròn phía trên màu vàng ngà có 2 tai hàn ở 2 bên -->
+          <ellipse cx="515" cy="165" rx="72" ry="52" fill="#e7e5e4" stroke="#a8a29e" stroke-width="3"/>
+          <circle cx="515" cy="165" r="26" fill="#334155" stroke="#0f172a" stroke-width="4"/>
+
+          <!-- Đường chỉ dẫn ra chốt A, F, F, G, K -->
+          <text x="588" y="195" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">A</text>
+          <line x1="485" y1="320" x2="465" y2="375" stroke="#334155" stroke-width="1.8"/>
+          <line x1="535" y1="320" x2="545" y2="375" stroke="#334155" stroke-width="1.8"/>
+          <text x="465" y="402" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">F</text>
+          <text x="545" y="402" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle" class="aux-hint">F</text>
+
+          <line x1="565" y1="285" x2="628" y2="312" stroke="#334155" stroke-width="1.8"/>
+          <text x="602" y="315" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">G</text>
+          <line x1="550" y1="310" x2="628" y2="365" stroke="#334155" stroke-width="1.8"/>
+          <text x="602" y="368" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">K</text>
+
+          <!-- 3. ĐỒNG HỒ MILIAMPE KẾ A2 (TRÊN PHẢI) -->
+          <rect x="710" y="110" width="150" height="135" rx="6" fill="#18181b" stroke="#09090b" stroke-width="3"/>
+          <rect x="722" y="122" width="126" height="75" fill="#ffffff"/>
+          <path d="M 735 182 Q 785 135 835 182" fill="none" stroke="#334155" stroke-width="1.5"/>
+          <text x="785" y="176" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">mA (A2)</text>
+          <text x="718" y="283" font-size="12" font-weight="bold" fill="#0f172a" class="aux-hint">1mA</text>
+          <text x="822" y="283" font-size="12" font-weight="bold" fill="#0f172a" class="aux-hint">3mA</text>
+          <text x="652" y="165" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+          <text x="652" y="218" font-size="13" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+
+          <!-- 4. ĐỒNG HỒ VÔN KẾ V (GIỮA PHẢI) -->
+          <rect x="710" y="295" width="150" height="125" rx="6" fill="#18181b" stroke="#09090b" stroke-width="3"/>
+          <rect x="722" y="307" width="126" height="72" fill="#ffffff"/>
+          <path d="M 735 365 Q 785 320 835 365" fill="none" stroke="#334155" stroke-width="1.5"/>
+          <text x="785" y="360" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">V</text>
+          <text x="725" y="450" font-size="12" font-weight="bold" fill="#0f172a" class="aux-hint">10V</text>
+          <text x="825" y="450" font-size="12" font-weight="bold" fill="#0f172a" class="aux-hint">12V</text>
+          <text x="642" y="315" font-size="13" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+          <text x="642" y="368" font-size="13" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+
+          <!-- 5. BA BỘ NGUỒN MỘT CHIỀU U1, U2, U3 DƯỚI CÙNG -->
+          <rect x="148" y="470" width="245" height="175" rx="3" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <circle cx="175" cy="498" r="10" fill="#18181b"/><text x="202" y="502" font-size="11" font-weight="bold" fill="#0f172a">F5A</text>
+          <circle cx="235" cy="548" r="20" fill="#18181b" stroke="#475569" stroke-width="3"/>
+          <text x="270" y="618" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">U1 (0 - 6V/5A)</text>
+          <text x="312" y="532" font-size="14" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+          <text x="358" y="532" font-size="14" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+
+          <rect x="415" y="470" width="245" height="175" rx="3" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <text x="448" y="532" font-size="14" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+          <text x="495" y="532" font-size="14" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+          <circle cx="555" cy="555" r="20" fill="#18181b" stroke="#475569" stroke-width="3"/>
+          <circle cx="628" cy="502" r="10" fill="#18181b"/><text x="596" y="506" font-size="11" font-weight="bold" fill="#0f172a">F1A</text>
+          <text x="535" y="618" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">U2 (0 - 6V/1A)</text>
+
+          <rect x="682" y="470" width="315" height="175" rx="3" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+          <text x="720" y="532" font-size="14" font-weight="bold" fill="#0f172a" class="aux-hint">-</text>
+          <text x="768" y="532" font-size="14" font-weight="bold" fill="#dc2626" class="aux-hint">+</text>
+          <circle cx="845" cy="560" r="20" fill="#18181b" stroke="#475569" stroke-width="3"/>
+          <circle cx="945" cy="505" r="10" fill="#18181b"/><text x="905" y="509" font-size="11" font-weight="bold" fill="#0f172a">F0.5A</text>
+          <text x="845" y="622" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">U3 (0 - 12V/0.1A)</text>
+        </g>
+      `;
+    }
+
+    function getBai6RealTerminals() {
+      return [
+        // 2 chốt dọc bên phải đồng hồ A1: trên là (+), dưới là (-) (Chuẩn ảnh image_5d6523 & image_5d6577)
+        { id: "A1_POS", label: "Ampe kế A1 (+ / Chốt trên)", x: 352, y: 262, color: "#18181b" },
+        { id: "A1_NEG", label: "Ampe kế A1 (- / Chốt dưới)", x: 352, y: 310, color: "#18181b" },
+
+        // 2 chốt trên đỉnh vành tròn cuộn dây Solenoid (như trong ảnh image_5d6577)
+        { id: "SOL_TOP_L", label: "Đỉnh cuộn Solenoid D (Chốt Trái)", x: 462, y: 145, color: "#dc2626" },
+        { id: "SOL_TOP_R", label: "Đỉnh cuộn Solenoid D (Chốt Phải)", x: 568, y: 175, color: "#dc2626" },
+
+        // Chốt Anốt A duy nhất phía trên bên phải cuộn dây
+        { id: "MAG_A", label: "Điện cực Anốt A", x: 590, y: 215, color: "#18181b" },
+
+        // 2 chốt đốt tim đèn F - F phía dưới
+        { id: "MAG_F1", label: "Sợi nung F (Trái)", x: 465, y: 375, color: "#18181b" },
+        { id: "MAG_F2", label: "Sợi nung F (Phải)", x: 545, y: 375, color: "#18181b" },
+
+        // Chốt Lưới G và Catốt K
+        { id: "MAG_G", label: "Lưới G", x: 628, y: 312, color: "#18181b" },
+        { id: "MAG_K", label: "Catốt K", x: 628, y: 365, color: "#18181b" },
+
+        // 2 chốt dọc bên trái đồng hồ mA (A2): trên là (-), dưới là (+)
+        { id: "A2_NEG", label: "mA kế A2 (- / Chốt trên)", x: 675, y: 162, color: "#18181b" },
+        { id: "A2_POS", label: "mA kế A2 (+ / Chốt dưới)", x: 675, y: 215, color: "#18181b" },
+
+        // 2 chốt dọc bên trái đồng hồ Vôn kế V: trên là (+), dưới là (-)
+        { id: "V_POS", label: "Vôn kế V (+ / Chốt trên)", x: 662, y: 312, color: "#18181b" },
+        { id: "V_NEG", label: "Vôn kế V (- / Chốt dưới)", x: 662, y: 365, color: "#18181b" },
+
+        // 3 bộ nguồn U1, U2, U3: trái là (-), phải là (+)
+        { id: "U1_NEG", label: "Nguồn U1 (- / Trái)", x: 312, y: 500, color: "#18181b" },
+        { id: "U1_POS", label: "Nguồn U1 (+ / Phải)", x: 358, y: 500, color: "#dc2626" },
+        { id: "U2_NEG", label: "Nguồn U2 (- / Trái)", x: 448, y: 500, color: "#18181b" },
+        { id: "U2_POS", label: "Nguồn U2 (+ / Phải)", x: 495, y: 500, color: "#dc2626" },
+        { id: "U3_NEG", label: "Nguồn U3 (- / Trái)", x: 720, y: 500, color: "#18181b" },
+        { id: "U3_POS", label: "Nguồn U3 (+ / Phải)", x: 768, y: 500, color: "#dc2626" }
+      ];
+    }
+
+    /***********************************************************************
+     * BỘ GIẢI THUẬT CHẤM ĐIỂM CHO CẢ 10 SƠ ĐỒ MẠCH
+     ***********************************************************************/
+    class DisjointSet {
+      constructor(elements) {
+        this.parent = {};
+        elements.forEach(e => (this.parent[e] = e));
+      }
+      find(x) {
+        if (this.parent[x] === undefined) this.parent[x] = x;
+        if (this.parent[x] !== x) this.parent[x] = this.find(this.parent[x]);
+        return this.parent[x];
+      }
+      union(a, b) {
+        const rootA = this.find(a);
+        const rootB = this.find(b);
+        if (rootA !== rootB) this.parent[rootB] = rootA;
+      }
+      connected(a, b) {
+        return this.find(a) === this.find(b);
+      }
+    }
+
+    function buildGraph() {
+      const exp = EXPERIMENTS[currentExpId];
+      const ids = exp.terminals.map(t => t.id);
+      const uf = new DisjointSet(ids);
+
+      // Các đường mạch in nối sẵn bên dưới mặt bảng thật
+      if (currentExpId === "b1_1" || currentExpId === "b1_2") {
+        uf.union("B_X", "B_RX_L");
+        uf.union("B_RX_R", "B_R0_L");
+        uf.union("B_R0_R", "B_Y");
+      } else if (currentExpId.startsWith("b3_")) {
+        // Bảng BKC.006E (theo ảnh thật mới), các đường mạch in nối sẵn:
+        // Thanh trên-trái: GF đỏ - ổ đỏ trái Rx
+        uf.union("GF_TOP", "TOP_A");
+        // 2 lỗ cắm tại vị trí Rx nối mạch in với 2 ổ đỏ hai bên
+        uf.union("TOP_A", "RXS_L");
+        uf.union("TOP_B", "RXS_R");
+        // Thanh trên-phải (sau hộp Rx): ổ đỏ phải Rx - ổ đỏ nhánh C - ổ đỏ nhánh L
+        uf.union("TOP_B", "CB_TOP");
+        uf.union("TOP_B", "LB_TOP");
+        // Thanh dưới-trái: GF đen - ổ đen 1 - ổ đen 2
+        uf.union("GF_BOT", "BOT_1");
+        uf.union("GF_BOT", "BOT_2");
+        // Thanh dưới-phải (sau tụ mẫu C): ổ đen 3 - ổ đen nhánh C - ổ đen nhánh L
+        uf.union("BOT_3", "CB_BOT");
+        uf.union("BOT_3", "LB_BOT");
+      } else if (currentExpId.startsWith("b5_")) {
+        // Mạch in nối sẵn trên bảng từ trễ BKC.013E:
+        uf.union("B5_GF_BOT", "B5_R1_L");   // GF dưới ➔ ổ trái R1 (điểm COM)
+        uf.union("B5_GF_TOP", "B5_TAP");    // chốt phụ nối thông GF trên
+        uf.union("B5_R1_L", "B5_UX_L");     // 4 chốt: R1 trái ~ Ux trái
+        uf.union("B5_R1_R", "B5_UX_R");     // R1 phải ~ Ux phải
+        // (N1, N2, mẫu R, mẫu C là linh kiện hai đầu: không tính là dây dẫn)
+        // Hai ổ đất của máy đo nối chung bên trong máy
+        if (currentExpId === "b5_1") uf.union("B5_OSC_X_BLK", "B5_OSC_Y_BLK");
+        else uf.union("DAQ_A_NEG", "DAQ_B_NEG");
+      }
+
+      wires.forEach(w => uf.union(w.from, w.to));
+      return { uf };
+    }
+
+    /* --- VALIDATE BÀI 1 (MẠCH 1) --- */
+    function validateBai1_1(uf) {
+      const res = [];
+      if (uf.connected("SRC_POS", "SRC_NEG")) {
+        res.push({ type: "err", text: "🚨 CẢNH BÁO NGẮN MẠCH: Nguồn DC đang bị nối tắt!" });
+        return res;
+      }
+      const srcOk = uf.connected("SRC_POS", "A_POS") && uf.connected("A_NEG", "RULER_X") && uf.connected("SRC_NEG", "RULER_Y");
+      res.push(srcOk
+        ? { type: "ok", text: "✅ Mạch nguồn & Ampe kế A: Đã nối đúng Nguồn DC ➔ Ampe kế A ➔ Hai đầu thước X - Y." }
+        : { type: "err", text: "❌ Mạch nguồn & Ampe kế A: Hãy nối Nguồn (+) ➔ A (+), A (-) ➔ Chốt X (xuống thước X), Nguồn (-) ➔ Chốt Y (xuống thước Y)." });
+
+      const rxOk = !uf.connected("EXT_RX_1", "EXT_RX_2") &&
+        ((uf.connected("B_RX_L", "EXT_RX_1") && uf.connected("B_RX_R", "EXT_RX_2")) ||
+         (uf.connected("B_RX_L", "EXT_RX_2") && uf.connected("B_RX_R", "EXT_RX_1")));
+      res.push(rxOk
+        ? { type: "ok", text: "✅ Nhánh điện trở Rx: Đã nối đúng 2 chốt Rx trên bảng ra hộp Rx." }
+        : { type: "err", text: "❌ Nhánh Rx: Hãy nối 2 chốt Rx trên bảng sang 2 chốt của Hộp Rx." });
+
+      const r0Terms = ["BOX_R0_TOP", "BOX_R0_MID", "BOX_R0_LOW", "BOX_R0_COM"];
+      let r0Ok = false;
+      for (let i = 0; i < r0Terms.length; i++) {
+        for (let j = i + 1; j < r0Terms.length; j++) {
+          if (!uf.connected(r0Terms[i], r0Terms[j]) &&
+              ((uf.connected("B_R0_L", r0Terms[i]) && uf.connected("B_R0_R", r0Terms[j])) ||
+               (uf.connected("B_R0_L", r0Terms[j]) && uf.connected("B_R0_R", r0Terms[i])))) {
+            r0Ok = true;
+          }
+        }
+      }
+      res.push(r0Ok
+        ? { type: "ok", text: "✅ Nhánh Hộp điện trở R0: Đã nối đúng 2 chốt R0 sang Hộp R0 đen." }
+        : { type: "err", text: "❌ Nhánh Hộp R0: Hãy nối 2 chốt R0 trên bảng sang 2 trong 4 giắc ở cạnh phải Hộp R0 đen." });
+
+      const gOk = !uf.connected("G_L", "G_R") &&
+        ((uf.connected("B_RX_R", "G_L") && uf.connected("G_R", "RULER_Z")) ||
+         (uf.connected("B_RX_R", "G_R") && uf.connected("G_L", "RULER_Z")));
+      res.push(gOk
+        ? { type: "ok", text: "✅ Nhánh cầu Điện kế G: Đã nối chuẩn từ điểm giữa (Rx - R0) qua G xuống chốt Z và ra con chạy Z." }
+        : { type: "err", text: "❌ Nhánh Điện kế G: Hãy nối từ điểm giữa (chốt phải Rx / chốt trái R0) lên G, từ G nối xuống chốt Z và ra con chạy Z." });
+      return res;
+    }
+
+    /* --- VALIDATE BÀI 1 (MẠCH 2) --- */
+    function validateBai1_2(uf) {
+      const res = [];
+      const mainOk = uf.connected("SRC_POS", "A_POS") && uf.connected("A_NEG", "RULER_X") && uf.connected("SRC_NEG", "RULER_Y");
+      res.push(mainOk
+        ? { type: "ok", text: "✅ Vòng mạch dòng chính: Nguồn DC ➔ Ampe kế A ➔ Dây cầu X - Y đã mắc chính xác." }
+        : { type: "err", text: "❌ Vòng mạch dòng chính: Kiểm tra đường nối Nguồn (+) ➔ A (+), A (-) ➔ Đầu thước X, Nguồn (-) ➔ Đầu thước Y." });
+
+      const exOk = uf.connected("EX_POS", "RULER_X") && !uf.connected("G_L", "G_R") &&
+        ((uf.connected("EX_NEG", "G_L") && uf.connected("G_R", "RULER_Z")) ||
+         (uf.connected("EX_NEG", "G_R") && uf.connected("G_L", "RULER_Z")));
+      res.push(exOk
+        ? { type: "ok", text: "✅ Nhánh xung đối (X ➔ Ex+ ➔ Ex- ➔ G ➔ Z): Đã mắc đúng cực và khép kín về con chạy Z." }
+        : { type: "err", text: "❌ Nhánh xung đối: Hãy nối Đầu X ➔ Cực (+) của Ex, Cực (-) của Ex ➔ Điện kế G ➔ Con chạy Z." });
+      return res;
+    }
+
+    /* --- VALIDATE BÀI 2 (HẰNG SỐ ĐIỆN MÔI) --- */
+    function validateBai2(uf) {
+      const res = [];
+      if (uf.connected("HV_POS", "HV_GND") || uf.connected("HV_POS", "HV_MASS")) {
+        res.push({ type: "err", text: "🚨 CẢNH BÁO NGẮN MẠCH CAO ÁP: Chốt Cao áp (+) đang nối chập trực tiếp với Đất (-/Mass)!" });
+        return res;
+      }
+
+      const hvToCap = !uf.connected("RES14_L", "RES14_R") &&
+        ((uf.connected("HV_POS", "RES14_L") && uf.connected("RES14_R", "CAP_TOP_12")) ||
+         (uf.connected("HV_POS", "RES14_R") && uf.connected("RES14_L", "CAP_TOP_12")));
+
+      res.push(hvToCap
+        ? { type: "ok", text: "✅ Mạch cấp cao áp qua Điện trở bảo vệ (14): Đã nối chuẩn từ Nguồn (+) ➔ Điện trở bảo vệ (14) ➔ Chốt bản cực trên (12)." }
+        : { type: "err", text: "❌ Mạch cấp cao áp: Bắt buộc phải nối từ Nguồn cao áp (+) đi qua 2 chốt của Hộp điện trở bảo vệ (14) rồi mới lên chốt đỉnh bản cực (12)!" });
+
+      const gndOk = (uf.connected("HV_GND", "EM_GND_L") || uf.connected("HV_MASS", "EM_GND_L")) &&
+                    uf.connected("EM_GND_L", "WAND_13");
+      res.push(gndOk
+        ? { type: "ok", text: "✅ Mạch nối đất & Thanh nối đất cầm tay (13): Đã nối đất chung giữa Nguồn, Vỏ điện trường kế và Thanh nối đất (13)." }
+        : { type: "err", text: "❌ Mạch nối đất: Hãy nối chốt (-) hoặc Mass của Nguồn với chốt đất của Điện trường kế và Thanh nối đất cầm tay (13)." });
+
+      const dmmOk = uf.connected("EM_OUT_POS", "DMM2_V") && uf.connected("EM_OUT_NEG", "DMM2_COM");
+      res.push(dmmOk
+        ? { type: "ok", text: "✅ Mạch đo Vôn kế (Thang 3 VDC): Đã nối đúng ngõ ra (+ / -) của Điện trường kế sang Vôn kế." }
+        : { type: "err", text: "❌ Mạch Vôn kế: Hãy nối 2 chốt ngõ ra (+/-) của Điện trường kế sang chốt V (+) và COM (-) của Vôn kế." });
+
+      return res;
+    }
+
+    /* --- VALIDATE BÀI 3 (BẢNG BKC.006E) --- */
+    function validateBai3(uf, mode) {
+      const res = [];
+      if (uf.connected("FG_RED", "FG_BLK")) {
+        res.push({ type: "err", text: "🚨 NGẮN MẠCH MÁY PHÁT FG-8020H!" });
+        return res;
+      }
+      const across = (a1, a2, b1, b2) => !uf.connected(a1, a2) &&
+        ((uf.connected(a1, b1) && uf.connected(a2, b2)) || (uf.connected(a1, b2) && uf.connected(a2, b1)));
+
+      const fgOk = (uf.connected("FG_RED", "GF_TOP") && uf.connected("FG_BLK", "GF_BOT")) ||
+                   (uf.connected("FG_RED", "GF_BOT") && uf.connected("FG_BLK", "GF_TOP"));
+      res.push(fgOk
+        ? { type: "ok", text: "✅ Máy phát FG-8020H: giắc đỏ vào ổ GF đỏ, giắc đen vào ổ GF đen (góc trái bảng)." }
+        : { type: "err", text: "❌ Máy phát FG-8020H: cắm giắc Đỏ vào ổ đỏ GF và giắc Đen vào ổ đen GF ở góc trái bảng." });
+
+      const rxOut = !!(switches.sw_RX && switches.sw_RX.value === "RÚT RA");
+      const wired = id => wires.some(w => w.from === id || w.to === id);
+
+      // Mạng nối sẵn: N1 = GF_TOP/TOP_A (đầu A), N2 = TOP_B/nhánh C,L đỏ (sau Rx),
+      //               N3 = GF_BOT/BOT_1/BOT_2 (đầu B), N4 = BOT_3/nhánh C,L đen (sau tụ mẫu C)
+      if (mode === "h8") {
+        // Hình 8: vòng kín FG ➔ Rx ➔ đường ray phải ➔ R0 ➔ FG
+        const r0Ok = across("BOX_R0_L", "BOX_R0_R", "GF_BOT", "BOT_3");
+        res.push(r0Ok
+          ? { type: "ok", text: "✅ Hộp điện trở mẫu R0: 2 giắc đã cắm vào ổ đen số 2 và số 3 (R0 nằm giữa B và C như Hình 8)." }
+          : { type: "err", text: "❌ Hộp điện trở R0 (Hình 8): R0 nằm trên thanh dưới, giữa B và C; cắm 2 giắc của hộp R0 vào ổ đen số 2 và ổ đen số 3 (hai bên tụ mẫu C)." });
+
+        if (uf.connected("TOP_A", "TOP_B")) {
+          res.push({ type: "err", text: "❌ Vị trí Rx đang bị nối tắt: Hình 8 không có dây nối 2 ổ đỏ hai bên Rx. Hãy rút dây đó ra (Rx phải nằm trong vòng mạch)." });
+        } else if (rxOut && !wired("RXS_L") && !wired("RXS_R")) {
+          res.push({ type: "warn", text: "⚠️ Hộp Rx đã rút ra nhưng 2 lỗ cắm tại vị trí Rx đang trống: cắm Lx / Cx vào đó hoặc cắm lại hộp Rx." });
+        } else {
+          res.push({ type: "ok", text: "✅ Vị trí Rx (Zx): không bị nối tắt, nằm trong vòng mạch." });
+        }
+
+        const railOk = uf.connected("TOP_B", "BOT_3");
+        res.push(railOk
+          ? { type: "ok", text: "✅ Đường ray bên phải: đã có dây nối từ phía trên bên phải xuống phía dưới bên phải (Rx ➔ R0)." }
+          : { type: "err", text: "❌ Đường ray bên phải: thiếu dây nối từ ổ đỏ phía trên bên phải (nhánh L/C) xuống ổ đen phía dưới bên phải (nhánh L/C) để dòng đi từ Rx về R0." });
+
+        const scopeOk = uf.connected("OSC_Y_RED", "GF_TOP") &&
+                        uf.connected("OSC_X_RED", "GF_BOT") &&
+                        uf.connected("OSC_X_BLK", "BOT_3") &&
+                        uf.connected("OSC_Y_BLK", "BOT_3");
+        res.push(scopeOk
+          ? { type: "ok", text: "✅ Dao động ký (Hình 8): Y+ ở đầu A phía Rx, X+ ở đầu B phía FG, 2 dây Đen chụm tại điểm giữa Rx và R0." }
+          : { type: "err", text: "❌ Dao động ký (Hình 8): Y+ (đỏ CH2) vào thanh trên phía TRÁI Rx (ổ GF đỏ / ổ đỏ trái Rx); X+ (đỏ CH1) vào ổ đen số 1 (hoặc 2); 2 dây Đen (CH1, CH2) chụm vào ổ đen số 3." });
+      } else {
+        // Hình 9 / 10: R0 thay vào vị trí Rx; Y+ ở sau R0; đất ở đầu B
+        const r0Ok = across("BOX_R0_L", "BOX_R0_R", "TOP_A", "TOP_B");
+        res.push(r0Ok
+          ? { type: "ok", text: "✅ Hộp điện trở mẫu R0: 2 giắc đã cắm vào 2 ổ đỏ hai bên vị trí Rx (R0 nối tiếp trên thanh trên)." }
+          : { type: "err", text: "❌ Hộp điện trở R0: cắm 2 giắc của hộp R0 vào 2 ổ đỏ nằm hai bên vị trí Rx (thanh trên)." });
+
+        res.push(rxOut
+          ? { type: "ok", text: "✅ Hộp Rx đã rút ra: R0 không bị song song với Rx." }
+          : { type: "err", text: "❌ Hộp Rx đang cắm: Hình " + (mode === "h9" ? "9" : "10") + " không có Rx, hãy RÚT hộp Rx (công tắc \"Rx\") để R0 không bị song song với Rx." });
+
+        if (mode === "h9") {
+          res.push(!uf.connected("GF_BOT", "BOT_3")
+            ? { type: "ok", text: "✅ Cx (tụ mẫu C) nằm nối tiếp trên thanh dưới, không bị nối tắt." }
+            : { type: "err", text: "❌ Tụ mẫu C đang bị nối tắt (ổ đen 2 nối với ổ đen 3): Hình 9 là mạch NỐI TIẾP, tụ C phải nằm trong vòng mạch." });
+        } else {
+          res.push(uf.connected("GF_BOT", "BOT_3")
+            ? { type: "ok", text: "✅ Thanh dưới liền mạch: tụ mẫu C đã được nối tắt, nhánh C và nhánh L (song song) về thẳng FG." }
+            : { type: "err", text: "❌ Hình 10 (song song): thanh dưới không có tụ nối tiếp, hãy nối tắt tụ mẫu C (ổ đen số 2 ➔ ổ đen số 3) để nhánh C // nhánh L về FG." });
+        }
+
+        const scopeOk = uf.connected("OSC_X_RED", "GF_TOP") &&
+                        uf.connected("OSC_Y_RED", "TOP_B") && !uf.connected("OSC_Y_RED", "GF_TOP") &&
+                        uf.connected("OSC_X_BLK", "GF_BOT") &&
+                        uf.connected("OSC_Y_BLK", "GF_BOT");
+        res.push(scopeOk
+          ? { type: "ok", text: "✅ Dao động ký: X+ ở đầu A (trước R0), Y+ ở sau R0, 2 dây Đen chụm ở đầu B phía FG." }
+          : { type: "err", text: "❌ Dao động ký: X+ (đỏ CH1) vào thanh trên phía trái R0 (ổ GF đỏ / ổ đỏ trái); Y+ (đỏ CH2) vào ổ đỏ PHẢI R0 (ổ đỏ phải vị trí Rx), không trùng với X+; 2 dây Đen (CH1, CH2) chụm vào ổ đen số 1 (hoặc 2)." });
+      }
+      return res;
+    }
+
+    /* --- VALIDATE BÀI 4 (ỐNG DÂY SOLENOID & ĐỒNG HỒ UNI-T) --- */
+    function validateBai4(uf) {
+      const res = [];
+      if (uf.connected("P02_AC_1", "P02_AC_2")) {
+        res.push({ type: "err", text: "🚨 CẢNH BÁO NGẮN MẠCH: Hai chốt nguồn xoay chiều AC ~ đang bị nối chập!" });
+        return res;
+      }
+      const used = id => wires.some(w => w.from === id || w.to === id);
+      if (used("P02_DC_POS") || used("P02_DC_NEG")) {
+        res.push({ type: "err", text: "❌ SAI LOẠI NGUỒN: Bài 4 đo bằng Từ thông kế xoay chiều nên phải cắm vào 2 chốt AC ~ (dưới), KHÔNG cắm vào chốt DC!" });
+      }
+      const rheoUsed = ["RHEO_BOT_L", "RHEO_BOT_R", "RHEO_SLIDER"].filter(used);
+      if (rheoUsed.length !== 2) {
+        res.push({ type: "err", text: "❌ Biến trở RhS20-2: chỉ dùng đúng 2 trong 3 chốt (1 đầu + chốt thanh trượt, hoặc 2 đầu cuộn dây). Hiện đang dùng " + rheoUsed.length + " chốt." });
+      }
+      if (used("UNIT_MA") || used("UNIT_V")) {
+        res.push({ type: "err", text: "❌ Đồng hồ UNI-T: Để đo dòng xoay chiều lớn, chỉ cắm chốt 20A và chốt COM (không dùng chốt mA hay V/Ω)!" });
+      }
+      const elements = [
+        { name: "Nguồn AC ~", t: ["P02_AC_1", "P02_AC_2"] },
+        { name: "Biến trở RhS20-2", t: rheoUsed.length === 2 ? rheoUsed : null },
+        { name: "Ống dây Solenoid", t: ["SOL4_L", "SOL4_R"] },
+        { name: "Đồng hồ UNI-T (20A - COM)", t: ["UNIT_20A", "UNIT_COM"] }
+      ];
+      const deg = {}, adj = {};
+      let ringOk = true;
+      for (const e of elements) {
+        if (!e.t || !used(e.t[0]) || !used(e.t[1])) {
+          res.push({ type: "err", text: "❌ " + e.name + ": chưa cắm đủ 2 đầu vào mạch." });
+          ringOk = false; continue;
+        }
+        const a = uf.find(e.t[0]), b = uf.find(e.t[1]);
+        if (a === b) {
+          res.push({ type: "err", text: "❌ " + e.name + ": hai đầu đang bị nối tắt với nhau." });
+          ringOk = false; continue;
+        }
+        deg[a] = (deg[a] || 0) + 1; deg[b] = (deg[b] || 0) + 1;
+        (adj[a] = adj[a] || []).push(b); (adj[b] = adj[b] || []).push(a);
+      }
+      if (ringOk) {
+        const nets = Object.keys(deg);
+        const degOk = nets.every(n => deg[n] === 2);
+        const seen = new Set([nets[0]]); const stack = [nets[0]];
+        while (stack.length) { const n = stack.pop(); (adj[n] || []).forEach(m => { if (!seen.has(m)) { seen.add(m); stack.push(m); } }); }
+        if (degOk && seen.size === nets.length) {
+          res.push({ type: "ok", text: "✅ Vòng mạch nối tiếp Bài 4: Nguồn AC ~ ➔ Biến trở ➔ Ống dây Solenoid ➔ Đồng hồ UNI-T (20A - COM) ➔ về Nguồn AC ~, khép kín đúng." });
+        } else {
+          res.push({ type: "err", text: "❌ Bốn phần tử (Nguồn AC, Biến trở, Ống dây, Ampe kế) phải mắc NỐI TIẾP thành một vòng kín duy nhất — hiện đang bị rẽ nhánh hoặc đứt vòng." });
+        }
+      }
+      return res;
+    }
+
+    /* --- VALIDATE BÀI 5 (ĐƯỜNG CONG TỪ TRỄ) --- */
+    function validateBai5(uf, target) {
+      const res = [];
+      const C = (a, b) => uf.connected(a, b);
+      const direct = (a, b) => wires.some(w => (w.from === a && w.to === b) || (w.from === b && w.to === a));
+      const plugged = id => wires.some(w => w.from === id || w.to === id);
+      const T = target === "scope"
+        ? { xs: "B5_OSC_X_RED", xg: "B5_OSC_X_BLK", ys: "B5_OSC_Y_RED", yg: "B5_OSC_Y_BLK",
+            name: "Dao động ký", xn: "CH1 (X)", yn: "CH2 (Y)", gn: "dây Đen (COM)" }
+        : { xs: "DAQ_A_POS", xg: "DAQ_A_NEG", ys: "DAQ_B_POS", yg: "DAQ_B_NEG",
+            name: "CASSY-S", xn: "INPUT A (ổ U đỏ)", yn: "INPUT B (ổ U đỏ)", gn: "dây vào ổ đất (xanh dương)" };
+
+      // ---- 1. Nguồn
+      if (C("P01_AC_1", "P01_AC_2")) {
+        res.push({ type: "err", text: "🚨 NGẮN MẠCH NGUỒN: 2 chốt AC ~ đang bị nối thẳng với nhau!" });
+        return res;
+      }
+      if (C("B5_GF_TOP", "B5_GF_BOT")) {
+        res.push({ type: "err", text: "🚨 NGẮN MẠCH: GF trên (hoặc chốt phụ) và GF dưới đang bị nối thẳng với nhau bằng dây, không qua cuộn N1 và R1!" });
+        return res;
+      }
+      const srcOk = (C("P01_AC_1", "B5_GF_TOP") && C("P01_AC_2", "B5_GF_BOT")) ||
+                    (C("P01_AC_2", "B5_GF_TOP") && C("P01_AC_1", "B5_GF_BOT"));
+      res.push(srcOk
+        ? { type: "ok", text: "✅ Nguồn xoay chiều: đã cấp đúng vào 2 ổ GF (xoay chiều nên không phân biệt đầu)." }
+        : { type: "err", text: "❌ Nguồn: nối 2 chốt AC ~ của bộ nguồn vào 2 ổ GF (trên và dưới) ở bên trái bảng." });
+
+      // ---- 2. Hộp điện trở cam = R1 (2 ổ hàng trên)
+      const boxShort = C("ORANGE_R_1", "ORANGE_R_2");
+      const boxOk = !boxShort &&
+        ((direct("ORANGE_R_1", "B5_R1_L") && direct("ORANGE_R_2", "B5_R1_R")) ||
+         (direct("ORANGE_R_2", "B5_R1_L") && direct("ORANGE_R_1", "B5_R1_R")));
+      if (C("B5_R1_L", "B5_R1_R")) {
+        res.push({ type: "err", text: "❌ R1 đang bị nối tắt: ổ trái và ổ phải (R1 hoặc Ux) không được nối thẳng với nhau bằng dây." });
+      } else if (C("B5_GF_TOP", "B5_R1_R")) {
+        res.push({ type: "err", text: "❌ Có dây nối GF trên (hoặc chốt phụ) với ổ phải R1/Ux: cuộn N1 bị nối tắt, bỏ qua biến áp." });
+      } else if (boxShort) {
+        res.push({ type: "err", text: "🚨 Hộp điện trở cam: 2 chốt của hộp đang bị nối tắt với nhau." });
+      } else {
+        res.push(boxOk
+          ? { type: "ok", text: "✅ Hộp điện trở thập phân (cam) đã cắm đúng vào 2 ổ R1 (hàng trên): mạch sơ cấp Nguồn – N1 – R1 – Nguồn hoàn chỉnh." }
+          : { type: "err", text: "❌ R1: cắm 2 giắc của hộp điện trở cam vào 2 ổ R1 (hàng trên, cạnh nhãn R1), mỗi chốt một ổ. Không cắm vào các ổ Ux." });
+      }
+
+      // ---- 3. Mạch thứ cấp: phải cắm mẫu R và mẫu C vào bảng
+      const rIn = switches.sw_R && switches.sw_R.value === "CẮM";
+      const cIn = switches.sw_C && switches.sw_C.value === "CẮM";
+      if (C("B5_C_A", "B5_C_B")) {
+        res.push({ type: "err", text: "❌ Hai ổ Uy (hai đầu tụ C) đang bị nối thẳng với nhau bằng dây." });
+      } else if (rIn && cIn) {
+        res.push({ type: "ok", text: "✅ Mạch thứ cấp: đã cắm mẫu R = 1 MΩ và mẫu C = 0,68 µF ➔ N2 – R – C nối tiếp (mạch tích phân RC)." });
+      } else {
+        const miss = [!rIn ? "mẫu R = 1 MΩ" : null, !cIn ? "mẫu C = 0,68 µF" : null].filter(Boolean).join(" và ");
+        res.push({ type: "err", text: "❌ Mạch thứ cấp hở: chưa cắm " + miss + " vào bảng (bấm công tắc tương ứng sang CẮM)." });
+      }
+
+      // ---- 4. Máy đo
+      const sigX = direct(T.xs, "B5_UX_R") && !C(T.xs, "B5_C_A");
+      const sigY = direct(T.ys, "B5_C_A") && !C(T.ys, "B5_UX_R");
+      if (C(T.xs, "B5_C_A") && C(T.ys, "B5_UX_R")) {
+        res.push({ type: "err", text: "❌ " + T.name + ": đã nối ngược kênh – Ux phải vào " + T.xn + ", Uy (cạnh tụ C) phải vào " + T.yn + "." });
+      } else if (C(T.xs, T.ys) || C(T.xs, T.xg) || C(T.ys, T.yg)) {
+        res.push({ type: "err", text: "🚨 " + T.name + ": chốt tín hiệu đang bị nối tắt với chốt tín hiệu kia hoặc với chốt đất/COM." });
+      } else {
+        res.push(sigX && sigY
+          ? { type: "ok", text: "✅ " + T.name + ": Ux (ổ phải hàng dưới) ➔ " + T.xn + "; Uy (ổ trên cạnh tụ C) ➔ " + T.yn + "." }
+          : { type: "err", text: "❌ " + T.name + ": nối " + T.xn + " vào ổ PHẢI của Ux (hàng dưới), và " + T.yn + " vào ổ Uy phía TRÊN (+) cạnh tụ C." });
+      }
+
+      const g1 = T.xg, g2 = T.yg;
+      const gndOk = (direct(g1, "B5_UX_L") && direct(g2, "B5_C_B")) ||
+                    (direct(g2, "B5_UX_L") && direct(g1, "B5_C_B"));
+      const comOk = C("B5_UX_L", "B5_C_B");
+      res.push(gndOk && comOk
+        ? { type: "ok", text: "✅ Điểm chung COM: " + T.gn + " đã cắm vào ổ trái Ux và ổ Uy phía dưới (−), hai điểm thành một điểm chung." }
+        : { type: "err", text: "❌ COM: dùng cả 2 " + T.gn + " của " + T.name + ": một dây vào ổ TRÁI của Ux (hàng dưới), một dây vào ổ Uy phía DƯỚI (−) cạnh tụ C." });
+
+      return res;
+    }
+
+    /* --- VALIDATE BÀI 6 (MAGNETRON CHUẨN 2 ẢNH MỚI NHẤT) --- */
+    function validateBai6(uf) {
+      const res = [];
+      if (uf.connected("U1_POS", "U1_NEG")) res.push({ type: "err", text: "🚨 NGẮN MẠCH NGUỒN U1!" });
+      if (uf.connected("U2_POS", "U2_NEG")) res.push({ type: "err", text: "🚨 NGẮN MẠCH NGUỒN U2!" });
+      if (uf.connected("U3_POS", "U3_NEG")) res.push({ type: "err", text: "🚨 NGẮN MẠCH NGUỒN U3!" });
+
+      const loop1Ok = !uf.connected("SOL_TOP_L", "SOL_TOP_R") &&
+        uf.connected("U1_POS", "A1_POS") &&
+        ((uf.connected("A1_NEG", "SOL_TOP_L") && uf.connected("SOL_TOP_R", "U1_NEG")) ||
+         (uf.connected("A1_NEG", "SOL_TOP_R") && uf.connected("SOL_TOP_L", "U1_NEG")));
+
+      res.push(loop1Ok
+        ? { type: "ok", text: "✅ Mạch 1 (Tạo từ trường Solenoid D): Đã nối đúng U1 (+) ➔ A1 (+ trên) ; A1 (- dưới) ➔ 2 chốt trên đỉnh cuộn Solenoid ➔ U1 (-)." }
+        : { type: "err", text: "❌ Mạch 1 (Solenoid D): Hãy nối U1 (+) ➔ Chốt trên (+) của A1; từ chốt dưới (-) của A1 nối qua 2 chốt trên đỉnh cuộn dây Solenoid rồi về U1 (-)." });
+
+      const loop2Ok = !uf.connected("MAG_F1", "MAG_F2") &&
+        ((uf.connected("U2_POS", "MAG_F1") && uf.connected("U2_NEG", "MAG_F2")) ||
+         (uf.connected("U2_POS", "MAG_F2") && uf.connected("U2_NEG", "MAG_F1")));
+      res.push(loop2Ok
+        ? { type: "ok", text: "✅ Mạch 2 (Đốt tim đèn F - F): Hai chốt F - F đã nối đúng vào nguồn U2." }
+        : { type: "err", text: "❌ Mạch 2 (Sợi nung F - F): Hãy nối 2 chốt F - F dưới chân đèn vào 2 cực (-) và (+) của nguồn U2." });
+
+      const cathodeOk = uf.connected("U3_NEG", "V_NEG") && uf.connected("U3_NEG", "MAG_K");
+      const gridOk = uf.connected("U3_POS", "V_POS") && uf.connected("U3_POS", "MAG_G") && uf.connected("U3_POS", "A2_POS");
+      const anodeOk = uf.connected("A2_NEG", "MAG_A") && !uf.connected("MAG_A", "MAG_G") && !uf.connected("MAG_A", "MAG_K");
+
+      if (cathodeOk && gridOk && anodeOk) {
+        res.push({ type: "ok", text: "✅ Mạch 3 (Anốt - Lưới - Catốt): Đã cắm chính xác 100% giống ảnh chụp thực tế tại phòng thí nghiệm!" });
+      } else {
+        if (!cathodeOk) res.push({ type: "err", text: "❌ Nút Catốt K: Cực (-) của U3, chốt dưới (-) của Vôn kế V và chốt K phải nối chung." });
+        if (!gridOk) res.push({ type: "err", text: "❌ Nút Dương & Lưới G: Cực (+) của U3, chốt trên (+) của V, chốt G và chốt dưới (+) của mA kế A2 phải nối chung." });
+        if (!anodeOk) res.push({ type: "err", text: "❌ Nhánh Anốt A: Chốt trên (-) của mA kế A2 phải nối sang chốt A (bên phải cuộn dây)." });
+      }
+      return res;
+    }
+
+    /***********************************************************************
+     * RENDER CHỐT CẮM, DÂY NỐI VÀ SỰ KIỆN TƯƠNG TÁC
+     ***********************************************************************/
+    function loadExperiment(expId) {
+      currentExpId = expId;
+      activeTerminalId = null;
+      wires = [];
+      tempWire.setAttribute("d", "");
+
+      const exp = EXPERIMENTS[expId];
+      document.getElementById("exp-title").textContent = exp.title;
+      document.getElementById("exp-desc").innerHTML = exp.desc;
+      switches = JSON.parse(JSON.stringify(exp.switches || {}));
+
+      exp.drawDevices();
+      renderTerminalsAndSwitches();
+      renderWires();
+      document.getElementById("diagnostic-list").innerHTML = `
+        <li class="check-item">Hãy cắm dây vào các lỗ giắc chuối trên mặt máy, sau đó bấm <b>"Kiểm tra mạch"</b>.</li>
+      `;
+    }
+
+    function renderTerminalsAndSwitches() {
+      const exp = EXPERIMENTS[currentExpId];
+      let html = "";
+
+      Object.entries(switches).forEach(([key, sw]) => {
+        html += `
+          <g class="switch-box" onclick="toggleSwitch('${key}')">
+            <rect x="${sw.x - 28}" y="${sw.y - 11}" width="56" height="22" rx="11" fill="#27272a" stroke="#71717a" stroke-width="2"/>
+            <circle cx="${sw.value === sw.options[0] ? sw.x - 13 : sw.x + 13}" cy="${sw.y}" r="8" fill="#e4e4e7"/>
+            <text x="${sw.x}" y="${sw.y - 15}" font-size="9.5" font-weight="bold" fill="#0f172a" text-anchor="middle">${sw.value}</text>
+          </g>
+        `;
+      });
+
+      exp.terminals.forEach(t => {
+        if (t.rxOnly && !(switches.sw_RX && switches.sw_RX.value === "RÚT RA")) return;
+        const isSelected = activeTerminalId === t.id;
+        const plugCount = wires.filter(w => w.from === t.id || w.to === t.id).length;
+
+        html += `
+          <g class="terminal-group ${isSelected ? "selected" : ""}"
+             onclick="handleTerminalClick('${t.id}', event)">
+            <title>${t.label} (Đang cắm: ${plugCount} giắc)</title>
+            <circle class="terminal-hit" cx="${t.x}" cy="${t.y}" r="17" />
+            <circle class="terminal-outer" cx="${t.x}" cy="${t.y}" r="9.5"
+                    fill="${t.color}" stroke="#e2e8f0" stroke-width="2" />
+            <circle cx="${t.x}" cy="${t.y}" r="3.8" fill="#09090b" stroke="#94a3b8" stroke-width="1"/>
+            ${plugCount >= 2 ? `
+              <circle cx="${t.x + 9}" cy="${t.y - 9}" r="6.5" fill="#facc15" stroke="#0f172a" stroke-width="1"/>
+              <text x="${t.x + 9}" y="${t.y - 6}" font-size="8.5" font-weight="bold" fill="#0f172a" text-anchor="middle">${plugCount}</text>
+            ` : ""}
+          </g>
+        `;
+      });
+
+      layerTerminals.innerHTML = html;
+    }
+
+    window.toggleSwitch = function(key) {
+      const sw = switches[key];
+      if (!sw) return;
+      sw.value = sw.value === sw.options[0] ? sw.options[1] : sw.options[0];
+      if (key === "sw_RX" && sw.value === "CẮM") {
+        // cắm Rx lại thì 2 lỗ bị che: gỡ dây đang cắm vào đó
+        wires = wires.filter(w => !/^RXS_/.test(w.from) && !/^RXS_/.test(w.to));
+        if (activeTerminalId && /^RXS_/.test(activeTerminalId)) activeTerminalId = null;
+        renderWires();
+      }
+      EXPERIMENTS[currentExpId].drawDevices();
+      renderTerminalsAndSwitches();
+    };
+
+    window.handleTerminalClick = function(termId, event) {
+      event.stopPropagation();
+      if (!activeTerminalId) {
+        activeTerminalId = termId;
+        renderTerminalsAndSwitches();
+        return;
+      }
+      if (activeTerminalId === termId) {
+        activeTerminalId = null;
+        tempWire.setAttribute("d", "");
+        renderTerminalsAndSwitches();
+        return;
+      }
+
+      const exists = wires.some(
+        w => (w.from === activeTerminalId && w.to === termId) ||
+             (w.from === termId && w.to === activeTerminalId)
+      );
+      if (!exists) {
+        wires.push({
+          id: "w_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          from: activeTerminalId,
+          to: termId,
+          color: selectedWireColor
+        });
+      }
+
+      activeTerminalId = null;
+      tempWire.setAttribute("d", "");
+      renderTerminalsAndSwitches();
+      renderWires();
+    };
+
+    function getBezierWirePath(x1, y1, x2, y2, idx = 0) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dist = Math.hypot(dx, dy);
+      const sag = Math.min(85, Math.max(24, dist * 0.19)) + (idx % 3) * 10;
+      return `M ${x1} ${y1} C ${x1 + dx * 0.25} ${y1 + dy * 0.25 + sag}, ${x1 + dx * 0.75} ${y1 + dy * 0.75 + sag}, ${x2} ${y2}`;
+    }
+
+    function renderWires() {
+      const exp = EXPERIMENTS[currentExpId];
+      const termMap = {};
+      exp.terminals.forEach(t => (termMap[t.id] = t));
+
+      layerWires.innerHTML = wires.map((w, idx) => {
+        const t1 = termMap[w.from];
+        const t2 = termMap[w.to];
+        if (!t1 || !t2) return "";
+        const d = getBezierWirePath(t1.x, t1.y, t2.x, t2.y, idx);
+        return `
+          <path class="wire-path" d="${d}" stroke="${w.color}" stroke-width="5.2"
+                ondblclick="removeWire('${w.id}')"
+                oncontextmenu="event.preventDefault(); removeWire('${w.id}')">
+            <title>${t1.label} ⟷ ${t2.label} (Click đúp để rút dây)</title>
+          </path>
+        `;
+      }).join("");
+
+      document.getElementById("wire-count-badge").textContent = `${wires.length} dây`;
+      const listEl = document.getElementById("wire-list-container");
+      if (wires.length === 0) {
+        listEl.innerHTML = `<span style="color: var(--text-muted); font-size:0.78rem;">Chưa có dây nào.</span>`;
+      } else {
+        listEl.innerHTML = wires.map(w => {
+          const t1 = termMap[w.from];
+          const t2 = termMap[w.to];
+          return `
+            <div class="wire-chip">
+              <span style="display:flex; align-items:center; gap:6px;">
+                <span style="width:9px; height:9px; border-radius:50%; background:${w.color}; display:inline-block;"></span>
+                ${t1?.label} ➔ ${t2?.label}
+              </span>
+              <button onclick="removeWire('${w.id}')">✕</button>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    window.removeWire = function(id) {
+      wires = wires.filter(w => w.id !== id);
+      renderTerminalsAndSwitches();
+      renderWires();
+    };
+
+    svg.addEventListener("mousemove", e => {
+      if (!activeTerminalId) return;
+      const exp = EXPERIMENTS[currentExpId];
+      const t1 = exp.terminals.find(t => t.id === activeTerminalId);
+      if (!t1) return;
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const cursor = pt.matrixTransform(svg.getScreenCTM().inverse());
+      tempWire.setAttribute("d", getBezierWirePath(t1.x, t1.y, cursor.x, cursor.y));
+    });
+
+    svg.addEventListener("click", () => {
+      if (activeTerminalId) {
+        activeTerminalId = null;
+        tempWire.setAttribute("d", "");
+        renderTerminalsAndSwitches();
+      }
+    });
+
+    document.getElementById("btn-check").addEventListener("click", () => {
+      const exp = EXPERIMENTS[currentExpId];
+      const { uf } = buildGraph();
+      const diagnostics = exp.validate(uf);
+      const allOk = diagnostics.every(d => d.type === "ok");
+
+      const banner = allOk
+        ? `<li class="check-item ok" style="font-weight:700;">🎉 CHÍNH XÁC 100%! Mạch đã được đấu nối đúng chuẩn thực tế trên phòng thí nghiệm!</li>`
+        : "";
+      document.getElementById("diagnostic-list").innerHTML =
+        banner + diagnostics.map(d => `<li class="check-item ${d.type}">${d.text}</li>`).join("");
+    });
+
+    document.getElementById("btn-hint").addEventListener("click", () => {
+      if (examMode) {
+        alert("Đang ở Chế độ Thi thử! Hãy tắt Chế độ Thi thử nếu muốn xem gợi ý.");
+        return;
+      }
+      const exp = EXPERIMENTS[currentExpId];
+      const { uf } = buildGraph();
+
+      if (exp.sampleSwitches) {
+        for (const [k, v] of Object.entries(exp.sampleSwitches)) {
+          if (switches[k] && switches[k].value !== v) {
+            switches[k].value = v;
+            exp.drawDevices();
+            renderTerminalsAndSwitches();
+            document.getElementById("diagnostic-list").innerHTML = `
+              <li class="check-item warn">💡 <b>Gợi ý:</b> Đã gạt công tắc <b>${switches[k].label}</b> sang <b>${v}</b>.</li>
+            `;
+            return;
+          }
+        }
+      }
+
+      for (const [fromId, toId, color] of exp.sampleWires) {
+        if (!uf.connected(fromId, toId)) {
+          wires.push({
+            id: "w_hint_" + Date.now(),
+            from: fromId,
+            to: toId,
+            color: color || selectedWireColor
+          });
+          renderTerminalsAndSwitches();
+          renderWires();
+          const t1 = exp.terminals.find(t => t.id === fromId);
+          const t2 = exp.terminals.find(t => t.id === toId);
+          document.getElementById("diagnostic-list").innerHTML = `
+            <li class="check-item warn">💡 <b>Gợi ý:</b> Đã cắm dây từ <b>${t1?.label}</b> sang <b>${t2?.label}</b>.</li>
+          `;
+          return;
+        }
+      }
+      document.getElementById("diagnostic-list").innerHTML = `
+        <li class="check-item ok">✨ Đã nối đủ các đường dây cần thiết! Hãy bấm <b>"Kiểm tra mạch"</b>.</li>
+      `;
+    });
+
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      wires = [];
+      activeTerminalId = null;
+      tempWire.setAttribute("d", "");
+      renderTerminalsAndSwitches();
+      renderWires();
+    });
+
+    document.getElementById("exp-select").addEventListener("change", e => loadExperiment(e.target.value));
+
+    document.getElementById("exam-mode-cb").addEventListener("change", e => {
+      examMode = e.target.checked;
+      document.body.classList.toggle("exam-mode", examMode);
+      document.getElementById("btn-hint").disabled = examMode;
+      document.getElementById("btn-hint").style.opacity = examMode ? "0.45" : "1";
+    });
+
+    document.querySelectorAll(".color-dot").forEach(dot => {
+      dot.addEventListener("click", () => {
+        document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
+        dot.classList.add("active");
+        selectedWireColor = dot.getAttribute("data-color");
+      });
+    });
+
+    loadExperiment("b1_1");
+  </script>
+</body>
+</html>
